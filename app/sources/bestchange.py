@@ -44,6 +44,20 @@ class Direction:
 DIRECTIONS: dict[str, Direction] = {
     d.key: d
     for d in (
+        # --- Аргентина (ARS) ---
+        Direction("usdt_mp", "tether-trc20-to-mercado-pago",
+                  "USDT TRC20 → Mercado Pago ARS", "USDT TRC20 → Mercado Pago ARS", "max"),
+        Direction("mp_usdt", "mercado-pago-to-tether-trc20",
+                  "Mercado Pago ARS → USDT TRC20", "Mercado Pago ARS → USDT TRC20", "min"),
+        Direction("usdt_card_ars", "tether-trc20-to-visa-mastercard-ars",
+                  "USDT TRC20 → Карта ARS", "USDT TRC20 → Tarjeta ARS", "max"),
+        Direction("usdt_wire_ars", "tether-trc20-to-wire-ars",
+                  "USDT TRC20 → Перевод ARS", "USDT TRC20 → Transferencia ARS", "max"),
+        Direction("usdt_prex", "tether-trc20-to-prex-ars",
+                  "USDT TRC20 → Prex ARS", "USDT TRC20 → Prex ARS", "max"),
+        Direction("usdt_cash_ars", "tether-trc20-to-ars-cash",
+                  "USDT TRC20 → Наличные ARS", "USDT TRC20 → Efectivo ARS", "max"),
+        # --- Россия (RUB) ---
         Direction("sb_usdt", "sberbank-to-tether-trc20",
                   "Сбербанк RUB → USDT TRC20", "Sberbank RUB → USDT TRC20", "min"),
         Direction("usdt_sb", "tether-trc20-to-sberbank",

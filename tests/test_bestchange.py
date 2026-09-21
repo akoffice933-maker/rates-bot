@@ -17,10 +17,18 @@ D = DIRECTIONS["sb_usdt"]
 # ---------- реестр направлений ----------
 
 def test_directions_registry():
-    assert DIRECTIONS_ORDER == ("sb_usdt", "usdt_sb", "tf_usdt", "usdt_tf", "usdt_btc")
+    assert DIRECTIONS_ORDER == (
+        # Аргентина — первыми (целевая аудитория бота)
+        "usdt_mp", "mp_usdt", "usdt_card_ars", "usdt_wire_ars", "usdt_prex", "usdt_cash_ars",
+        # Россия
+        "sb_usdt", "usdt_sb", "tf_usdt", "usdt_tf", "usdt_btc",
+    )
     assert direction_url(D) == "https://www.bestchange.com/sberbank-to-tether-trc20.html"
     assert D.better == "min"           # покупка USDT: ниже курс — лучше
     assert DIRECTIONS["usdt_sb"].better == "max"
+    assert direction_url(DIRECTIONS["usdt_mp"]) == "https://www.bestchange.com/tether-trc20-to-mercado-pago.html"
+    assert DIRECTIONS["usdt_mp"].better == "max"   # продажа USDT: выше курс ARS — лучше
+    assert DIRECTIONS["mp_usdt"].better == "min"
 
 
 # ---------- парсер (живая страница, обрезана до 25 строк) ----------
@@ -146,3 +154,33 @@ def test_render_round_numbers_regression():
     assert "90 RUB Sberbank" in text
     assert "9 RUB Sberbank" not in text
     assert "1 USDT TRC20" in text
+
+
+# ---------- ARS-направления (живая страница Mercado Pago, 21.09.2026) ----------
+
+MP_HTML = open("tests/fixtures/bc_usdt_mercadopago_ars.html", encoding="utf-8").read()
+
+
+def test_parse_rows_ars_fixture():
+    rows = parse_rows(MP_HTML)
+    assert len(rows) == 15
+    first = rows[0]
+    assert first.name == "SafuExchange"
+    assert first.give == 1.0 and first.receive == 1563.82
+    assert first.give_unit == "USDT TRC20" and "ARS" in first.receive_unit
+    assert first.click_url.startswith("https://www.bestchange.com/click.php?id=")
+    for r in rows:  # курсы в ARS, не RUB и не мусор
+        assert 1000 < r.receive < 3000, r
+
+
+def test_render_ars_direction():
+    result = BestChangeResult(
+        ok=True, error=None, direction_key="usdt_mp",
+        rows=tuple(parse_rows(MP_HTML)[:5]), fetched_at=NOW,
+    )
+    text = render.bc_text(result, DIRECTIONS["usdt_mp"], "ru", now=NOW)
+    assert "USDT TRC20 → Mercado Pago ARS" in text
+    assert "⬆️ курс выше — выгоднее продать" in text
+    assert "1 USDT TRC20 / 1 563,82 ARS MP" in text
+    assert "SafuExchange" in text
+    assert 'href="https://www.bestchange.com/click.php?id=' in text
