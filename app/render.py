@@ -279,3 +279,57 @@ def p2p_text(result, snap: Snapshot, lang: str, now: datetime | None = None) -> 
             lines.append("")
     lines.append(f"{t(lang, 'UPDATED')}: {fmt.ago(snap.fetched_at, lang, now)}")
     return "\n".join(lines)
+
+
+# ---------- /bestchange ----------
+
+def _bc_row(i: int, row, lang: str) -> str:
+    from .venue_links import ext_link
+
+    marker = "🥇 " if i == 1 else f"{i}. "
+
+    def amt(x: float) -> str:
+        # целые — без копеек (1, 90, 100), дробные — 2 знака (89,58)
+        return fmt.money(x, lang, 0 if abs(x - round(x)) < 1e-9 else 2)
+
+    parts = [
+        f"{marker}{ext_link(row.name, row.click_url)} — "
+        f"{amt(row.give)} {row.give_unit} / {amt(row.receive)} {row.receive_unit}"
+    ]
+    if row.min_amount is not None or row.max_amount is not None:
+        lo = f"{t(lang, 'BC_MIN')} {fmt.money(row.min_amount, lang, 0)}" if row.min_amount else ""
+        hi = f"{t(lang, 'BC_MAX')} {fmt.money(row.max_amount, lang, 0)}" if row.max_amount else ""
+        limits = " · ".join(x for x in (lo, hi) if x)
+        parts.append(limits)
+    if row.reserve is not None:
+        parts.append(f"{t(lang, 'BC_RESERVE')}: {fmt.money(row.reserve, lang, 0)} {row.receive_unit}")
+    if row.reviews:
+        parts.append(f"✓{row.reviews}")
+    return " · ".join(parts)
+
+
+def bc_text(result, direction, lang: str, now: datetime | None = None) -> str:
+    """Экран BestChange: топ обменников с кликабельными ссылками."""
+    now = _now(now)
+    name = direction.name_ru if lang == "ru" else direction.name_es
+    title = t(lang, "BC_TITLE", direction=name)
+
+    if not result.ok:
+        lines = [f"<b>{title}</b>", "", t(lang, "BC_UNAVAILABLE")]
+        return "\n".join(lines)
+
+    lines = [f"<b>{title}</b>", ""]
+    lines.append(t(lang, "BC_BETTER_MIN" if direction.better == "min" else "BC_BETTER_MAX"))
+    lines.append("")
+    if result.rows:
+        lines += [_bc_row(i, row, lang) for i, row in enumerate(result.rows, 1)]
+    else:
+        lines.append(t(lang, "BC_EMPTY"))
+    lines.append("")
+    if result.fetched_at:
+        lines.append(f"{t(lang, 'UPDATED')}: {fmt.ago(result.fetched_at, lang, now)}")
+    lines.append(t(lang, "BC_FOOTER"))
+    from .venue_links import SOURCE_URLS, ext_link
+
+    lines.append(ext_link(t(lang, "BC_CREDIT"), SOURCE_URLS["bestchange"]))
+    return "\n".join(lines)

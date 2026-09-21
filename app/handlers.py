@@ -20,6 +20,8 @@ from .keyboards import (
     alert_kb,
     alert_threshold_label,
     alert_value_kb,
+    bc_kb,
+    bc_screen_kb,
     digest_kb,
     guide_kb,
     lang_kb,
@@ -32,6 +34,8 @@ from .service import RatesService
 from .digest import DIGEST_HOURS
 from .p2p import BinanceP2PService
 from .guide import SCENARIOS, guide_menu_text, guide_text
+from .bestchange import BestChangeService
+from .sources.bestchange import DIRECTIONS
 from .storage import Alert, BotStorage
 
 router = Router()
@@ -608,3 +612,42 @@ async def cb_guide_scenario(cb: CallbackQuery, service: RatesService, storage: B
         text = t(lang, "NO_DATA")
     await _edit(cb, text, scenario_kb(lang))
     await cb.answer()
+
+
+# ---------- BestChange (обменники) ----------
+
+@router.message(Command("bestchange", "bc"))
+async def cmd_bestchange(message: Message, storage: BotStorage) -> None:
+    lang = storage.get_lang(message.chat.id, config.DEFAULT_LANG)
+    await message.answer(
+        f"<b>{t(lang, 'BC_DIR_PROMPT')}</b>", reply_markup=bc_kb(lang)
+    )
+
+
+@router.callback_query(F.data == "bc:menu")
+async def cb_bc_menu(cb: CallbackQuery, storage: BotStorage) -> None:
+    lang = storage.get_lang(cb.message.chat.id, config.DEFAULT_LANG)
+    await _edit(cb, f"<b>{t(lang, 'BC_DIR_PROMPT')}</b>", bc_kb(lang))
+    await cb.answer()
+
+
+async def _bc_screen(cb: CallbackQuery, bestchange: BestChangeService,
+                     storage: BotStorage, key: str, force: bool = False) -> None:
+    if key not in DIRECTIONS:
+        await cb.answer()
+        return
+    lang = storage.get_lang(cb.message.chat.id, config.DEFAULT_LANG)
+    result = await bestchange.get(key, force=force)
+    text = render.bc_text(result, DIRECTIONS[key], lang)
+    await _edit(cb, text, bc_screen_kb(lang, key))
+    await cb.answer()
+
+
+@router.callback_query(F.data.startswith("bc:dir:"))
+async def cb_bc_dir(cb: CallbackQuery, bestchange: BestChangeService, storage: BotStorage) -> None:
+    await _bc_screen(cb, bestchange, storage, cb.data.split(":", 2)[2])
+
+
+@router.callback_query(F.data.startswith("bc:rfsh:"))
+async def cb_bc_rfsh(cb: CallbackQuery, bestchange: BestChangeService, storage: BotStorage) -> None:
+    await _bc_screen(cb, bestchange, storage, cb.data.split(":", 2)[2], force=True)

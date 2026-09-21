@@ -16,6 +16,7 @@ SOURCE_URLS: dict[str, str] = {
     "ambito": "https://www.ambito.com/contenidos/dolar.html",
     "bna": "https://www.bna.com.ar/",
     "criptoya": "https://criptoya.com/",
+    "bestchange": "https://www.bestchange.com/",
 }
 
 # Где купить/продать USD (проверено живыми запросами 21.09.2026):

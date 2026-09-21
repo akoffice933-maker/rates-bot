@@ -22,6 +22,12 @@ class AiohttpClient:
             resp.raise_for_status()
             return await resp.json(content_type=None)
 
+    async def get_text(self, url: str, headers: dict | None = None) -> str:
+        hdrs = {"User-Agent": USER_AGENT, **(headers or {})}
+        async with self._session.get(url, timeout=self._timeout, headers=hdrs) as resp:
+            resp.raise_for_status()
+            return await resp.text()
+
     async def post_json(
         self,
         url: str,

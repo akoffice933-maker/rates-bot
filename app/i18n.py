@@ -20,6 +20,7 @@ STRINGS: dict[str, dict[str, str]] = {
             "/p2p — anuncios en vivo de Binance P2P\n"
             "/digest — resumen diario\n"
             "/how — guía de cambio paso a paso\n"
+            "/bestchange — mejores intercambiadores (RUB/USDT)\n"
             "/lang — idioma / язык\n\n"
             "🔁 — invertir la pareja en /rates y /usdt (ARS/USD, ARS/USDT)\n"
             "💵 — volumen de cálculo en la pantalla /usdt\n\n"
@@ -160,6 +161,19 @@ STRINGS: dict[str, dict[str, str]] = {
         "GUIDE_SELL_USD_ALTS": "<b>Alternativas:</b> 🏦 banco — curso oficial de compra (suele ser menor que el blue); 📈 si ya tenés cuenta comitente en un broker, podés vender el bono en USD y comprarlo en ARS (MEP).",
         "GUIDE_CASH_WARN": "⚠️ Con efectivo: revisá los billetes (hay falsificaciones de $100/$50), no cambies en la calle — solo en un local. Los montos en efectivo están sujetos a las normas de AFIP/aduana.",
         "GUIDE_FOOTER": "Cursos en tiempo real: /rates y /usdt · Verificá comisiones y límites antes de operar",
+        "BTN_BESTCHANGE": "💱 BestChange",
+        "BC_TITLE": "💱 BestChange — {direction}",
+        "BC_BETTER_MIN": "⬇️ курс ниже — выгоднее купить",
+        "BC_BETTER_MAX": "⬆️ курс выше — выгоднее продать",
+        "BC_UNAVAILABLE": "⛔️ BestChange ahora no está disponible. Probá de nuevo más tarde.",
+        "BC_EMPTY": "No hay intercambiadores activos para esta dirección.",
+        "BC_DIR_PROMPT": "Elegí la dirección de intercambio:",
+        "BC_MIN": "mín",
+        "BC_MAX": "máx",
+        "BC_RESERVE": "reserva",
+        "BC_REVIEWS": "reseñas",
+        "BC_FOOTER": "Tocá el nombre del intercambiador para ir al intercambio · Cursos y límites pueden cambiar",
+        "BC_CREDIT": "Datos: BestChange",
     },
     "ru": {
         "WELCOME": (
@@ -176,6 +190,7 @@ STRINGS: dict[str, dict[str, str]] = {
             "/p2p — живые объявления Binance P2P\n"
             "/digest — ежедневная сводка\n"
             "/how — как обменять, пошагово\n"
+            "/bestchange — лучшие обменники (RUB/USDT)\n"
             "/lang — язык / language\n\n"
             "🔁 — инверсия пары на /rates и /usdt (ARS/USD, ARS/USDT)\n"
             "💵 — объём расчёта на экране /usdt\n\n"
@@ -316,6 +331,19 @@ STRINGS: dict[str, dict[str, str]] = {
         "GUIDE_SELL_USD_ALTS": "<b>Альтернативы:</b> 🏦 банк — курс oficial покупки (обычно ниже blue); 📈 если есть брокерский счёт — продать облигацию в USD и купить в ARS (MEP).",
         "GUIDE_CASH_WARN": "⚠️ С наличными: проверяйте купюры (встречаются фальшивые $100/$50), не меняйте на улице — только в помещении. Наличные суммы подпадают под нормы AFIP/таможни.",
         "GUIDE_FOOTER": "Курсы в реальном времени: /rates и /usdt · Проверьте комиссии и лимиты перед операцией",
+        "BTN_BESTCHANGE": "💱 BestChange",
+        "BC_TITLE": "💱 BestChange — {direction}",
+        "BC_BETTER_MIN": "⬇️ курс ниже — выгоднее купить",
+        "BC_BETTER_MAX": "⬆️ курс выше — выгоднее продать",
+        "BC_UNAVAILABLE": "⛔️ BestChange сейчас недоступен. Попробуйте позже.",
+        "BC_EMPTY": "Нет активных обменников по этому направлению.",
+        "BC_DIR_PROMPT": "Выберите направление обмена:",
+        "BC_MIN": "мин",
+        "BC_MAX": "макс",
+        "BC_RESERVE": "резерв",
+        "BC_REVIEWS": "отзывов",
+        "BC_FOOTER": "Нажмите на название обменника, чтобы перейти к обмену · Курс и лимиты могут меняться",
+        "BC_CREDIT": "Данные: BestChange",
     },
 }
 

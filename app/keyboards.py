@@ -9,6 +9,7 @@ from .alerts import METRICS, METRICS_ORDER
 from .digest import DIGEST_HOURS
 from .i18n import t
 from .storage import Alert
+from .sources.bestchange import DIRECTIONS, DIRECTIONS_ORDER
 from .venue_links import SOURCE_URLS, USD_URLS
 
 # action -> (метка при direct, метка при inverse)
@@ -32,6 +33,7 @@ def main_menu(lang: str) -> InlineKeyboardMarkup:
             [
                 InlineKeyboardButton(text=t(lang, "BTN_P2P"), callback_data="p2p:scr"),
                 InlineKeyboardButton(text=t(lang, "BTN_SPREAD"), callback_data="scr:spread"),
+                InlineKeyboardButton(text=t(lang, "BTN_BESTCHANGE"), callback_data="bc:menu"),
             ],
             [
                 InlineKeyboardButton(text=t(lang, "BTN_ALERT"), callback_data="al:menu"),
@@ -200,6 +202,7 @@ def links_kb(lang: str) -> InlineKeyboardMarkup:
             [src_btn("📊 Bluelytics", "bluelytics"), src_btn("⚙️ DolarAPI", "dolarapi")],
             [src_btn("📰 Ámbito", "ambito"), src_btn("🏦 Banco Nación", "bna")],
             [src_btn("💰 CriptoYa", "criptoya")],
+            [src_btn("💱 BestChange", "bestchange")],
             # Где купить / продать USD
             [usd_btn("📈 InvertirOnline", "iol"), usd_btn("📈 Balanz", "balanz")],
             [usd_btn("📈 Bull Market", "bullmarket"), usd_btn("💳 Personal Pay", "personalpay")],
@@ -233,6 +236,29 @@ def scenario_kb(lang: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [InlineKeyboardButton(text=t(lang, "GUIDE_BTN"), callback_data="gw:menu")],
+            [InlineKeyboardButton(text=t(lang, "BTN_BACK"), callback_data="menu:main")],
+        ]
+    )
+
+
+# ---------- BestChange ----------
+
+def bc_kb(lang: str) -> InlineKeyboardMarkup:
+    """Выбор направления обмена."""
+    rows = [
+        [InlineKeyboardButton(text=DIRECTIONS[k].name_ru if lang == "ru" else DIRECTIONS[k].name_es,
+                              callback_data=f"bc:dir:{k}")]
+        for k in DIRECTIONS_ORDER
+    ]
+    rows.append([InlineKeyboardButton(text=t(lang, "BTN_BACK"), callback_data="menu:main")])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def bc_screen_kb(lang: str, key: str) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text=t(lang, "BTN_REFRESH"), callback_data=f"bc:rfsh:{key}")],
+            [InlineKeyboardButton(text="💱 BestChange", callback_data="bc:menu")],
             [InlineKeyboardButton(text=t(lang, "BTN_BACK"), callback_data="menu:main")],
         ]
     )
