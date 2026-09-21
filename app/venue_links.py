@@ -69,6 +69,10 @@ VENUE_URLS: dict[str, str] = {
     "peanut": "https://peanut.to/",
     "saldo": "https://www.saldo.com.ar/",
     "wallbit": "https://wallbit.io/",
+    # площадки пары USDT/USD (проверено 21.09.2026, 200 OK)
+    "xapo": "https://xapo.com/",
+    "banexcoin": "https://banexcoin.com/",
+    "x4t": "https://www.x4t.com/",
 }
 
 

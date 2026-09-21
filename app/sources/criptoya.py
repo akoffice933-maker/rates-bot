@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 
 URL_TEMPLATE = "https://criptoya.com/api/USDT/ARS/{volume}"
+URL_USDT_USD = "https://criptoya.com/api/USDT/USD"
 
 VENUE_NAMES = {
     "binancep2p": "Binance P2P",
@@ -50,6 +51,10 @@ VENUE_NAMES = {
     "peanut": "Peanut",
     "saldo": "Saldo",
     "wallbit": "Wallbit",
+    # площадки пары USDT/USD
+    "xapo": "Xapo",
+    "banexcoin": "Banexcoin",
+    "x4t": "X4T",
 }
 
 

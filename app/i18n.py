@@ -15,6 +15,7 @@ STRINGS: dict[str, dict[str, str]] = {
             "🤖 <b>Comandos</b>\n\n"
             "/rates — cotizaciones del dólar (oficial, blue, MEP, CCL, tarjeta)\n"
             "/usdt — mejores precios de USDT/ARS\n"
+            "/usdtusd — USDT ⇄ USD: efectivo y sin efectivo\n"
             "/spread — brecha USDT vs Blue\n"
             "/alert — alertas de brecha y de cotización\n"
             "/p2p — anuncios en vivo de Binance P2P\n"
@@ -70,6 +71,20 @@ STRINGS: dict[str, dict[str, str]] = {
         "LANG_SET": "✅ Idioma cambiado.",
         "JUST_NOW": "ahora mismo",
         "CRIPTOYA_CREDIT": "Datos: CriptoYa",
+        "BLUELYTICS_CREDIT": "Datos: Bluelytics",
+        "USDTUSD_TITLE": "💵 USDT ⇄ USD — Argentina",
+        "USDTUSD_CASHLESS": "💳 Sin efectivo — CriptoYa ({n} plataformas)",
+        "USDTUSD_BUY_HDR": "Comprar USDT (más barato primero):",
+        "USDTUSD_SELL_HDR": "Vender USDT (más caro primero):",
+        "USDTUSD_CASH_HDR": "💵 Efectivo — cálculo vía blue:",
+        "USDTUSD_CASH_BUY": "comprar 1 USDT ≈ {price} USD en efectivo ({pct} vs nominal)",
+        "USDTUSD_CASH_SELL": "vender 1 USDT ≈ {price} USD en efectivo ({pct})",
+        "USDTUSD_CASH_PATH": "ruta: USD ⇄ ARS al blue ({blue}) + mejor USDT/ARS ({venues})",
+        "USDTUSD_CUEVA": (
+            "💡 En las cuevas de CABA cambian USDT ⇄ USD billete directo por ~2–3% — "
+            "mejor que la ruta de dos pasos. Cotización: blue ± 3%, confirmá en el lugar."
+        ),
+        "BTN_USDTUSD": "💵 USDT⇄USD",
         "BTN_ALERT": "🔔 Alertas",
         "BTN_ALERT_ADD": "➕ Nueva alerta",
         "BTN_CUSTOM": "✏️ Otro valor",
@@ -185,6 +200,7 @@ STRINGS: dict[str, dict[str, str]] = {
             "🤖 <b>Команды</b>\n\n"
             "/rates — курсы доллара (oficial, blue, MEP, CCL, tarjeta)\n"
             "/usdt — лучшие цены USDT/ARS\n"
+            "/usdtusd — USDT ⇄ USD: наличные и безнал\n"
             "/spread — спред USDT vs Blue\n"
             "/alert — алерты спреда и курсов\n"
             "/p2p — живые объявления Binance P2P\n"
@@ -240,6 +256,20 @@ STRINGS: dict[str, dict[str, str]] = {
         "LANG_SET": "✅ Язык изменён.",
         "JUST_NOW": "только что",
         "CRIPTOYA_CREDIT": "Данные: CriptoYa",
+        "BLUELYTICS_CREDIT": "Данные: Bluelytics",
+        "USDTUSD_TITLE": "💵 USDT ⇄ USD — Аргентина",
+        "USDTUSD_CASHLESS": "💳 Безнал — CriptoYa ({n} площадок)",
+        "USDTUSD_BUY_HDR": "Купить USDT (дешевле — лучше):",
+        "USDTUSD_SELL_HDR": "Продать USDT (дороже — лучше):",
+        "USDTUSD_CASH_HDR": "💵 Наличные — расчёт через blue:",
+        "USDTUSD_CASH_BUY": "купить 1 USDT ≈ {price} USD наличными ({pct} к номиналу)",
+        "USDTUSD_CASH_SELL": "продать 1 USDT ≈ {price} USD наличными ({pct})",
+        "USDTUSD_CASH_PATH": "путь: USD ⇄ ARS по blue ({blue}) + лучший USDT/ARS ({venues})",
+        "USDTUSD_CUEVA": (
+            "💡 В cuevas (Буэнос-Айрес) меняют USDT ⇄ наличный USD напрямую за ~2–3% — "
+            "выгоднее двух шагов. Курс: blue ± 3%, уточняйте на месте."
+        ),
+        "BTN_USDTUSD": "💵 USDT⇄USD",
         "BTN_ALERT": "🔔 Алерты",
         "BTN_ALERT_ADD": "➕ Новый алерт",
         "BTN_CUSTOM": "✏️ Другое значение",

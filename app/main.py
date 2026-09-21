@@ -33,6 +33,7 @@ async def set_bot_commands(bot: Bot) -> None:
             BotCommand(command="start", description="Menú principal"),
             BotCommand(command="rates", description="Cotizaciones del dólar"),
             BotCommand(command="usdt", description="Mejores precios USDT/ARS"),
+            BotCommand(command="usdtusd", description="USDT ⇄ USD (efectivo/sin efectivo)"),
             BotCommand(command="p2p", description="Binance P2P en vivo"),
             BotCommand(command="spread", description="Brecha USDT vs Blue"),
             BotCommand(command="alert", description="Alertas de brecha y cotización"),

@@ -28,7 +28,7 @@ def main_menu(lang: str) -> InlineKeyboardMarkup:
             [
                 InlineKeyboardButton(text=t(lang, "BTN_RATES"), callback_data="scr:rates"),
                 InlineKeyboardButton(text=t(lang, "BTN_USDT"), callback_data="scr:usdt"),
-                InlineKeyboardButton(text=t(lang, "GUIDE_BTN"), callback_data="gw:menu"),
+                InlineKeyboardButton(text=t(lang, "BTN_USDTUSD"), callback_data="uu:scr"),
             ],
             [
                 InlineKeyboardButton(text=t(lang, "BTN_P2P"), callback_data="p2p:scr"),
@@ -36,6 +36,7 @@ def main_menu(lang: str) -> InlineKeyboardMarkup:
                 InlineKeyboardButton(text=t(lang, "BTN_BESTCHANGE"), callback_data="bc:menu"),
             ],
             [
+                InlineKeyboardButton(text=t(lang, "GUIDE_BTN"), callback_data="gw:menu"),
                 InlineKeyboardButton(text=t(lang, "BTN_ALERT"), callback_data="al:menu"),
                 InlineKeyboardButton(text=t(lang, "BTN_LANG"), callback_data="scr:lang"),
             ],
@@ -79,6 +80,17 @@ def screen_kb(
     rows.append([InlineKeyboardButton(text=t(lang, "BTN_LINKS"), callback_data="scr:links")])
     rows.append([InlineKeyboardButton(text=t(lang, "BTN_BACK"), callback_data="menu:main")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def uu_kb(lang: str) -> InlineKeyboardMarkup:
+    """Экран /usdtusd: обновить, источники, меню."""
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text=t(lang, "BTN_REFRESH"), callback_data="uu:rfsh")],
+            [InlineKeyboardButton(text=t(lang, "BTN_LINKS"), callback_data="scr:links")],
+            [InlineKeyboardButton(text=t(lang, "BTN_BACK"), callback_data="menu:main")],
+        ]
+    )
 
 
 def lang_kb(lang: str) -> InlineKeyboardMarkup:

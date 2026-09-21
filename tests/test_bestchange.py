@@ -20,6 +20,7 @@ def test_directions_registry():
     assert DIRECTIONS_ORDER == (
         # Аргентина — первыми (целевая аудитория бота)
         "usdt_mp", "mp_usdt", "usdt_card_ars", "usdt_wire_ars", "usdt_prex", "usdt_cash_ars",
+        "usdt_wire_usd", "wire_usd_usdt",
         # Россия
         "sb_usdt", "usdt_sb", "tf_usdt", "usdt_tf", "usdt_btc",
     )

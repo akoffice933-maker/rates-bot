@@ -97,6 +97,18 @@ class Snapshot:
         return None
 
 
+@dataclass(frozen=True)
+class UsdtUsdView:
+    """Экран /usdtusd: пара USDT/USD (CriptoYa) + снапшот для наличного кросса.
+
+    Безнал — прямые котировки USDT/USD аргентинских площадок (Xapo, Fiwind, …);
+    наличные — расчётный кросс USD-нал ⇄ ARS (blue) ⇄ USDT (лучшая площадка).
+    """
+
+    snap: Snapshot
+    usd: UsdtMarket | None = None
+
+
 def _filter_outliers(quotes: list[VenueQuote], attr: str, tolerance: float = OUTLIER_TOLERANCE) -> list[VenueQuote]:
     values = [getattr(q, attr) for q in quotes]
     median = statistics.median(values)
@@ -131,6 +143,7 @@ class RatesService:
         self._default_volume = default_volume
         self._usd: tuple[UsdData, datetime] | None = None
         self._criptoya: dict[int, tuple[list[VenueQuote], datetime]] = {}
+        self._criptoya_usd: tuple[list[VenueQuote], datetime] | None = None
         self._lock = asyncio.Lock()
 
     async def get_snapshot(self, volume: int | None = None, force: bool = False) -> Snapshot:
@@ -233,6 +246,29 @@ class RatesService:
             tarjeta=da.rates.get("tarjeta") if has_da else None,
             errors=tuple(errors),
         )
+
+    async def get_usdtusd_view(self, force: bool = False) -> UsdtUsdView:
+        """Данные для экрана /usdtusd: снапшот (blue + USDT/ARS) + пара USDT/USD."""
+        snap = await self.get_snapshot(force=force)
+        quotes = await self._get_criptoya_usd(force)
+        return UsdtUsdView(snap=snap, usd=build_market(quotes) if quotes else None)
+
+    async def _get_criptoya_usd(self, force: bool) -> list[VenueQuote] | None:
+        """CriptoYa USDT/USD: тот же кэш/TTL, при сбое — последний успешный."""
+        now = datetime.now(timezone.utc)
+        cached = self._criptoya_usd
+        if cached is not None and self._cache_ok(cached[1], now, force):
+            return cached[0]
+        try:
+            payload = await self._client.get_json(criptoya.URL_USDT_USD)
+            quotes = criptoya.parse(payload, now)
+        except Exception as exc:
+            log.warning("источник criptoya usdt/usd недоступен: %s", exc)
+            return cached[0] if cached else None
+        if not quotes and cached is not None:
+            return cached[0]
+        self._criptoya_usd = (quotes, now)
+        return quotes
 
     async def _fetch_bluelytics(self):
         payload = await self._client.get_json(bluelytics.URL)

@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 
 from . import formatting as fmt
 from .i18n import t
-from .service import Snapshot
+from .service import Snapshot, UsdtUsdView
 from .venue_links import SOURCE_URLS, ext_link, venue_link
 
 STALE_AFTER_SECONDS = 180        # снапшот старше 3×TTL помечаем как устаревший
@@ -174,6 +174,88 @@ def usdt_text(
         tail_parts.append(t(lang, "USDT_VOLUME_NOTE", vol=fmt.money(volume, lang, 0)))
     tail_parts.append(ext_link(t(lang, "CRIPTOYA_CREDIT"), SOURCE_URLS["criptoya"]))
     lines.append(" · ".join(tail_parts))
+    lines += _tail(snap, lang, now)
+    return "\n".join(lines)
+
+
+# ---------- /usdtusd ----------
+
+
+def usdtusd_text(view: UsdtUsdView, lang: str, now: datetime | None = None) -> str | None:
+    """USDT ⇄ USD в Аргентине: безнал (CriptoYa USDT/USD) + наличный расчёт через blue.
+
+    Наличный кросс (2 шага): купить USDT = лучший ask USDT/ARS ÷ blue compra;
+    продать USDT = лучший bid USDT/ARS ÷ blue venta. Прямой обмен в cuevas
+    обычно выгоднее (~2–3% комиссии) — об этом подсказка в конце блока.
+    """
+    now = _now(now)
+    snap = view.snap
+    m = view.usd
+    has_cashless = m is not None and bool(m.asks or m.bids)
+    best_ask = snap.usdt.asks[0] if snap.usdt and snap.usdt.asks else None
+    best_bid = snap.usdt.bids[0] if snap.usdt and snap.usdt.bids else None
+    has_cash = snap.blue is not None and (best_ask or best_bid) is not None
+    if not has_cashless and not has_cash:
+        return None
+
+    lines = _stale_banner(snap, lang, now)
+    lines += [f"<b>{t(lang, 'USDTUSD_TITLE')}</b>", ""]
+
+    if has_cashless:
+        lines.append(f"<b>{t(lang, 'USDTUSD_CASHLESS', n=str(len(m.all_venues)))}</b>")
+        lines.append("")
+        if m.asks:
+            lines.append(f"<b>{t(lang, 'USDTUSD_BUY_HDR')}</b>")
+            for i, q in enumerate(m.asks[:TOP_N], 1):
+                marker = "🥇 " if i == 1 else f"{i}. "
+                stale = " ⚠️" if q.time and (now - q.time).total_seconds() > VENUE_STALE_AFTER_SECONDS else ""
+                lines.append(f"{marker}{venue_link(q.key, q.name)} — {fmt.money(q.ask, lang, 4)} USD{stale}")
+            lines.append("")
+        if m.bids:
+            lines.append(f"<b>{t(lang, 'USDTUSD_SELL_HDR')}</b>")
+            for i, q in enumerate(m.bids[:TOP_N], 1):
+                marker = "🥇 " if i == 1 else f"{i}. "
+                stale = " ⚠️" if q.time and (now - q.time).total_seconds() > VENUE_STALE_AFTER_SECONDS else ""
+                lines.append(f"{marker}{venue_link(q.key, q.name)} — {fmt.money(q.bid, lang, 4)} USD{stale}")
+            lines.append("")
+
+    if has_cash:
+        lines.append(f"<b>{t(lang, 'USDTUSD_CASH_HDR')}</b>")
+        if best_ask is not None and snap.blue.buy:
+            price = best_ask.ask / snap.blue.buy
+            lines.append(
+                "• " + t(
+                    lang, "USDTUSD_CASH_BUY",
+                    price=fmt.money(price, lang, 4),
+                    pct=fmt.pct((price - 1) * 100, lang, 1),
+                )
+            )
+        if best_bid is not None and snap.blue.sell:
+            price = best_bid.bid / snap.blue.sell
+            lines.append(
+                "• " + t(
+                    lang, "USDTUSD_CASH_SELL",
+                    price=fmt.money(price, lang, 4),
+                    pct=fmt.pct((price - 1) * 100, lang, 1),
+                )
+            )
+        venues = " / ".join(q.name for q in (best_ask, best_bid) if q is not None)
+        lines.append(
+            t(
+                lang, "USDTUSD_CASH_PATH",
+                blue=f"{fmt.money(snap.blue.buy, lang, 0)}/{fmt.money(snap.blue.sell, lang, 0)}",
+                venues=venues,
+            )
+        )
+        lines.append("")
+        lines.append(t(lang, "USDTUSD_CUEVA"))
+        lines.append("")
+
+    credit = " · ".join(
+        ext_link(t(lang, key), SOURCE_URLS[src_key])
+        for key, src_key in (("CRIPTOYA_CREDIT", "criptoya"), ("BLUELYTICS_CREDIT", "bluelytics"))
+    )
+    lines.append(credit)
     lines += _tail(snap, lang, now)
     return "\n".join(lines)
 

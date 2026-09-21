@@ -29,6 +29,7 @@ from .keyboards import (
     links_kb,
     main_menu,
     screen_kb,
+    uu_kb,
 )
 from .service import RatesService
 from .digest import DIGEST_HOURS
@@ -123,6 +124,38 @@ async def cmd_usdt(message: Message, service: RatesService, storage: BotStorage)
     direction = storage.get_direction(message.chat.id)
     volume = storage.get_volume(message.chat.id, config.USDT_VOLUME_DEFAULT)
     await _send_screen(message, service, "usdt", lang, direction, volume)
+
+
+@router.message(Command("usdtusd"))
+async def cmd_usdtusd(message: Message, service: RatesService, storage: BotStorage) -> None:
+    lang = storage.get_lang(message.chat.id, config.DEFAULT_LANG)
+    view = await service.get_usdtusd_view()
+    text = render.usdtusd_text(view, lang)
+    if text is None:
+        await message.answer(t(lang, "NO_DATA"))
+        return
+    await message.answer(text, reply_markup=uu_kb(lang))
+
+
+@router.callback_query(F.data == "uu:scr")
+async def cb_uu_scr(cb: CallbackQuery, service: RatesService, storage: BotStorage) -> None:
+    lang = storage.get_lang(cb.message.chat.id, config.DEFAULT_LANG)
+    view = await service.get_usdtusd_view()
+    text = render.usdtusd_text(view, lang) or t(lang, "NO_DATA")
+    await _edit(cb, text, uu_kb(lang))
+    await cb.answer()
+
+
+@router.callback_query(F.data == "uu:rfsh")
+async def cb_uu_rfsh(cb: CallbackQuery, service: RatesService, storage: BotStorage) -> None:
+    lang = storage.get_lang(cb.message.chat.id, config.DEFAULT_LANG)
+    view = await service.get_usdtusd_view(force=True)
+    text = render.usdtusd_text(view, lang)
+    if text is None:
+        await cb.answer(t(lang, "NO_DATA"), show_alert=True)
+        return
+    await _edit(cb, text, uu_kb(lang))
+    await cb.answer("✅")
 
 
 @router.message(Command("spread"))

@@ -57,6 +57,10 @@ DIRECTIONS: dict[str, Direction] = {
                   "USDT TRC20 → Prex ARS", "USDT TRC20 → Prex ARS", "max"),
         Direction("usdt_cash_ars", "tether-trc20-to-ars-cash",
                   "USDT TRC20 → Наличные ARS", "USDT TRC20 → Efectivo ARS", "max"),
+        Direction("usdt_wire_usd", "tether-trc20-to-wire-usd",
+                  "USDT TRC20 → Перевод USD", "USDT TRC20 → Transferencia USD", "max"),
+        Direction("wire_usd_usdt", "wire-usd-to-tether-trc20",
+                  "Перевод USD → USDT TRC20", "Transferencia USD → USDT TRC20", "min"),
         # --- Россия (RUB) ---
         Direction("sb_usdt", "sberbank-to-tether-trc20",
                   "Сбербанк RUB → USDT TRC20", "Sberbank RUB → USDT TRC20", "min"),

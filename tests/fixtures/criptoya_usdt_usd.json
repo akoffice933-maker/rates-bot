@@ -1,0 +1,93 @@
+{
+ "xapo": {
+  "ask": 1.0014,
+  "totalAsk": 1.0014,
+  "bid": 0.9989,
+  "totalBid": 0.9989,
+  "time": 1790023971
+ },
+ "astropay": {
+  "ask": 1.005,
+  "totalAsk": 1.005,
+  "bid": 0.995,
+  "totalBid": 0.98,
+  "time": 1790024021
+ },
+ "banexcoin": {
+  "ask": 1.015,
+  "totalAsk": 1.015,
+  "bid": 0.995,
+  "totalBid": 0.995,
+  "time": 1790024024
+ },
+ "x4t": {
+  "ask": 1,
+  "totalAsk": 1.02,
+  "bid": 0.97,
+  "totalBid": 0.9409,
+  "time": 1790023971
+ },
+ "binancep2p": {
+  "ask": 1.023,
+  "totalAsk": 1.023,
+  "bid": 1.0328,
+  "totalBid": 1.0328,
+  "time": 1790024020
+ },
+ "kucoinp2p": {
+  "ask": 1.04,
+  "totalAsk": 1.04,
+  "bid": 0,
+  "totalBid": 0,
+  "time": 1758916093
+ },
+ "buenbit": {
+  "ask": 1.036,
+  "totalAsk": 1.0412,
+  "bid": 1.02,
+  "totalBid": 1.0149,
+  "time": 1790023989
+ },
+ "fiwind": {
+  "ask": 1.046,
+  "totalAsk": 1.046,
+  "bid": 1.036,
+  "totalBid": 1.036,
+  "time": 1790024024
+ },
+ "satoshitango": {
+  "ask": 1.043,
+  "totalAsk": 1.0482,
+  "bid": 1.021,
+  "totalBid": 1.0159,
+  "time": 1790023970
+ },
+ "decrypto": {
+  "ask": 1.048,
+  "totalAsk": 1.0517,
+  "bid": 1.01,
+  "totalBid": 0.9944,
+  "time": 1790023967
+ },
+ "okexp2p": {
+  "ask": 1.06,
+  "totalAsk": 1.06,
+  "bid": 1.031,
+  "totalBid": 1.031,
+  "time": 1790024012
+ },
+ "ripio": {
+  "ask": 1.0603,
+  "totalAsk": 1.0603,
+  "bid": 1.0386,
+  "totalBid": 1.0386,
+  "time": 1790023982
+ },
+ "letsbit": {
+  "ask": 1.0675,
+  "totalAsk": 1.0675,
+  "bid": 1.0098,
+  "totalBid": 1.0098,
+  "time": 1790023975
+ }
+}
