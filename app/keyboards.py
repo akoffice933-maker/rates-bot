@@ -27,6 +27,7 @@ def main_menu(lang: str) -> InlineKeyboardMarkup:
             [
                 InlineKeyboardButton(text=t(lang, "BTN_RATES"), callback_data="scr:rates"),
                 InlineKeyboardButton(text=t(lang, "BTN_USDT"), callback_data="scr:usdt"),
+                InlineKeyboardButton(text=t(lang, "GUIDE_BTN"), callback_data="gw:menu"),
             ],
             [
                 InlineKeyboardButton(text=t(lang, "BTN_P2P"), callback_data="p2p:scr"),
@@ -70,6 +71,9 @@ def screen_kb(
         rows.append(
             [InlineKeyboardButton(text=t(lang, "BTN_REFRESH"), callback_data=refresh_cb)]
         )
+    if action in ("rates", "usdt"):
+        target = "gw:buy_usd" if action == "rates" else "gw:buy_usdt"
+        rows.append([InlineKeyboardButton(text=t(lang, "GUIDE_BTN"), callback_data=target)])
     rows.append([InlineKeyboardButton(text=t(lang, "BTN_LINKS"), callback_data="scr:links")])
     rows.append([InlineKeyboardButton(text=t(lang, "BTN_BACK"), callback_data="menu:main")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
@@ -200,6 +204,35 @@ def links_kb(lang: str) -> InlineKeyboardMarkup:
             [usd_btn("📈 InvertirOnline", "iol"), usd_btn("📈 Balanz", "balanz")],
             [usd_btn("📈 Bull Market", "bullmarket"), usd_btn("💳 Personal Pay", "personalpay")],
             [usd_btn("🪙 Cocos", "cocos"), usd_btn("💳 Ualá", "uala")],
+            [InlineKeyboardButton(text=t(lang, "BTN_BACK"), callback_data="menu:main")],
+        ]
+    )
+
+
+# ---------- мастер обмена ----------
+
+def guide_kb(lang: str) -> InlineKeyboardMarkup:
+    """Выбор сценария обмена."""
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text=t(lang, "GUIDE_SC_BUY_USDT"), callback_data="gw:buy_usdt"),
+                InlineKeyboardButton(text=t(lang, "GUIDE_SC_SELL_USDT"), callback_data="gw:sell_usdt"),
+            ],
+            [
+                InlineKeyboardButton(text=t(lang, "GUIDE_SC_BUY_USD"), callback_data="gw:buy_usd"),
+                InlineKeyboardButton(text=t(lang, "GUIDE_SC_SELL_USD"), callback_data="gw:sell_usd"),
+            ],
+            [InlineKeyboardButton(text=t(lang, "BTN_BACK"), callback_data="menu:main")],
+        ]
+    )
+
+
+def scenario_kb(lang: str) -> InlineKeyboardMarkup:
+    """Экран сценария: сменить направление / в меню."""
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text=t(lang, "GUIDE_BTN"), callback_data="gw:menu")],
             [InlineKeyboardButton(text=t(lang, "BTN_BACK"), callback_data="menu:main")],
         ]
     )

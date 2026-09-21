@@ -21,7 +21,9 @@ from .keyboards import (
     alert_threshold_label,
     alert_value_kb,
     digest_kb,
+    guide_kb,
     lang_kb,
+    scenario_kb,
     links_kb,
     main_menu,
     screen_kb,
@@ -29,6 +31,7 @@ from .keyboards import (
 from .service import RatesService
 from .digest import DIGEST_HOURS
 from .p2p import BinanceP2PService
+from .guide import SCENARIOS, guide_menu_text, guide_text
 from .storage import Alert, BotStorage
 
 router = Router()
@@ -574,4 +577,34 @@ async def cb_digest_off(cb: CallbackQuery, storage: BotStorage) -> None:
         f"{t(lang, 'DIGEST_STATUS_OFF')}\n\n{t(lang, 'DIGEST_HOUR_PROMPT')}"
     )
     await _edit(cb, text, digest_kb(lang, None))
+    await cb.answer()
+
+
+# ---------- мастер обмена (🧭 как обменять) ----------
+
+@router.message(Command("how"))
+async def cmd_how(message: Message, storage: BotStorage) -> None:
+    lang = storage.get_lang(message.chat.id, config.DEFAULT_LANG)
+    await message.answer(guide_menu_text(lang), reply_markup=guide_kb(lang))
+
+
+@router.callback_query(F.data == "gw:menu")
+async def cb_guide_menu(cb: CallbackQuery, storage: BotStorage) -> None:
+    lang = storage.get_lang(cb.message.chat.id, config.DEFAULT_LANG)
+    await _edit(cb, guide_menu_text(lang), guide_kb(lang))
+    await cb.answer()
+
+
+@router.callback_query(F.data.startswith("gw:"))
+async def cb_guide_scenario(cb: CallbackQuery, service: RatesService, storage: BotStorage) -> None:
+    scenario = cb.data.split(":", 1)[1]
+    if scenario not in SCENARIOS:
+        await cb.answer()
+        return
+    lang = storage.get_lang(cb.message.chat.id, config.DEFAULT_LANG)
+    snap = await service.get_snapshot()
+    text = guide_text(snap, scenario, lang)
+    if text is None:
+        text = t(lang, "NO_DATA")
+    await _edit(cb, text, scenario_kb(lang))
     await cb.answer()

@@ -19,6 +19,7 @@ STRINGS: dict[str, dict[str, str]] = {
             "/alert — alertas de brecha y de cotización\n"
             "/p2p — anuncios en vivo de Binance P2P\n"
             "/digest — resumen diario\n"
+            "/how — guía de cambio paso a paso\n"
             "/lang — idioma / язык\n\n"
             "🔁 — invertir la pareja en /rates y /usdt (ARS/USD, ARS/USDT)\n"
             "💵 — volumen de cálculo en la pantalla /usdt\n\n"
@@ -133,6 +134,32 @@ STRINGS: dict[str, dict[str, str]] = {
         "DIGEST_DISABLED": "🔕 Digesta desactivada.",
         "DIGEST_BTN_CHANGE": "⏰ Cambiar horario",
         "DIGEST_BTN_OFF": "🔕 Desactivar",
+        "GUIDE_BTN": "🧭 Cómo cambiar",
+        "GUIDE_TITLE": "🧭 Cómo cambiar",
+        "GUIDE_PROMPT": "¿Qué querés hacer? Elegí el escenario y te muestro el mejor curso ahora y los pasos exactos.",
+        "GUIDE_SC_BUY_USDT": "💰 Comprar USDT con pesos",
+        "GUIDE_SC_SELL_USDT": "💰 Vender USDT por pesos",
+        "GUIDE_SC_BUY_USD": "💵 Comprar dólares (efectivo)",
+        "GUIDE_SC_SELL_USD": "💵 Vender dólares (efectivo)",
+        "GUIDE_SRC_MEP": "(bolsa, legal)",
+        "GUIDE_SRC_BLUE": "(efectivo)",
+        "GUIDE_SRC_BANK": "(banco)",
+        "GUIDE_BUY_USDT_HEAD": "🥇 Mejor curso ahora: {venue} — ${price} por 1 USDT\nPor $1.000 ARS ≈ {per} USDT\nSobrecosto vs blue: {pct}",
+        "GUIDE_SELL_USDT_HEAD": "🥇 Mejor curso ahora: {venue} — ${price} por 1 USDT\nPor 1.000 USDT ≈ ${per}\nVentaja vs blue: {pct}",
+        "GUIDE_P2P_BUY_STEPS": "<b>Pasos — Binance P2P:</b>\n1️⃣ Registráte en Binance y verificá tu identidad (DNI/pasaporte)\n2️⃣ Sección P2P → «Comprar USDT» → método de pago: Mercado Pago / transferencia\n3️⃣ Elegí un anuncio con ✓ alta reputación (⩾95%) y límites adecuados\n4️⃣ Ingresá el monto en ARS → «Comprar»: los USDT quedan bloqueados por la plataforma (escrow)\n5️⃣ Transferí los pesos según los datos del vendedor\n6️⃣ Marcá «Ya pagué» y esperá la confirmación: USDT en tu billetera spot",
+        "GUIDE_P2P_SELL_STEPS": "<b>Pasos — Binance P2P:</b>\n1️⃣ Tené los USDT en tu billetera spot de Binance\n2️⃣ P2P → «Vender USDT» → método por el cual recibís pesos\n3️⃣ Elegí un comprador con ✓ alta reputación\n4️⃣ Ingresá el monto → «Vender»: los USDT quedan bloqueados\n5️⃣ Esperá la transferencia a TU cuenta (verificá que llegó)\n6️⃣ Recién entonces confirmá la recepción: los USDT se liberan al comprador",
+        "GUIDE_P2P_WARN": "⚠️ Nunca confirmes el pago antes de haberlo hecho, y no aceptes salir del chat de la plataforma: la protección escrow solo funciona dentro de ella.",
+        "GUIDE_BUY_USDT_ALTS": "<b>Alternativas:</b> apps argentinas (Lemon, Belo, Buenbit, Ripio) — depositás pesos y comprás USDT en un par de toques; exchange Bitso.",
+        "GUIDE_SELL_USDT_ALTS": "<b>Alternativas:</b> las mismas apps con retiro en ARS; el agregado de CriptoYa (/usdt) muestra dónde está el mejor curso ahora.",
+        "GUIDE_BUY_USD_HEAD": "Cursos de COMPRA del dólar ahora:",
+        "GUIDE_SELL_USD_HEAD": "Cursos de VENTA del dólar ahora:",
+        "GUIDE_BEST_LINE": "🥇 Lo más conveniente: {name} — ${price}",
+        "GUIDE_MEP_STEPS": "<b>Pasos — dólar MEP (bolsa):</b>\n1️⃣ Abrí una cuenta en un broker con acceso a bonos (InvertirOnline, Balanz, Bull Market)\n2️⃣ Depositá pesos (transferencia desde tu banco)\n3️⃣ Comprá un bono en ARS (p. ej. AL30/AL35 en pesos)\n4️⃣ Vendélo en USD: los dólares acreditan en tu cuenta (ese curso es el MEP)\n⏱ Suele tardar 1–2 días hábiles; comisión del broker ~0,5–1%",
+        "GUIDE_CUEVA_STEPS": "<b>Pasos — cueva (mercado blue):</b>\n1️⃣ Buscá una cueva de confianza (por recomendación)\n2️⃣ Consultá el curso de compra por teléfono/WhatsApp antes de ir\n3️⃣ El cambio se hace en el local: que cuenten los pesos delante tuyo\n4️⃣ Montos grandes: avisá con anticipación o dividí en partes",
+        "GUIDE_BUY_USD_ALTS": "<b>Alternativas:</b> 🏦 banco — curso oficial, requiere cuenta; 💵 cueva — efectivo inmediato al curso blue, en el microcentro porteño (calle Florida) compará entre varias.",
+        "GUIDE_SELL_USD_ALTS": "<b>Alternativas:</b> 🏦 banco — curso oficial de compra (suele ser menor que el blue); 📈 si ya tenés cuenta comitente en un broker, podés vender el bono en USD y comprarlo en ARS (MEP).",
+        "GUIDE_CASH_WARN": "⚠️ Con efectivo: revisá los billetes (hay falsificaciones de $100/$50), no cambies en la calle — solo en un local. Los montos en efectivo están sujetos a las normas de AFIP/aduana.",
+        "GUIDE_FOOTER": "Cursos en tiempo real: /rates y /usdt · Verificá comisiones y límites antes de operar",
     },
     "ru": {
         "WELCOME": (
@@ -148,6 +175,7 @@ STRINGS: dict[str, dict[str, str]] = {
             "/alert — алерты спреда и курсов\n"
             "/p2p — живые объявления Binance P2P\n"
             "/digest — ежедневная сводка\n"
+            "/how — как обменять, пошагово\n"
             "/lang — язык / language\n\n"
             "🔁 — инверсия пары на /rates и /usdt (ARS/USD, ARS/USDT)\n"
             "💵 — объём расчёта на экране /usdt\n\n"
@@ -262,6 +290,32 @@ STRINGS: dict[str, dict[str, str]] = {
         "DIGEST_DISABLED": "🔕 Дайджест выключен.",
         "DIGEST_BTN_CHANGE": "⏰ Изменить время",
         "DIGEST_BTN_OFF": "🔕 Отключить",
+        "GUIDE_BTN": "🧭 Как обменять",
+        "GUIDE_TITLE": "🧭 Как обменять",
+        "GUIDE_PROMPT": "Что вы хотите сделать? Выберите сценарий — покажу лучший курс сейчас и точные шаги.",
+        "GUIDE_SC_BUY_USDT": "💰 Купить USDT за песо",
+        "GUIDE_SC_SELL_USDT": "💰 Продать USDT за песо",
+        "GUIDE_SC_BUY_USD": "💵 Купить доллары (наличные)",
+        "GUIDE_SC_SELL_USD": "💵 Продать доллары (наличные)",
+        "GUIDE_SRC_MEP": "(биржа, легально)",
+        "GUIDE_SRC_BLUE": "(наличные)",
+        "GUIDE_SRC_BANK": "(банк)",
+        "GUIDE_BUY_USDT_HEAD": "🥇 Лучший курс сейчас: {venue} — ${price} за 1 USDT\nЗа $1.000 ARS ≈ {per} USDT\nПереплата к blue: {pct}",
+        "GUIDE_SELL_USDT_HEAD": "🥇 Лучший курс сейчас: {venue} — ${price} за 1 USDT\nЗа 1.000 USDT ≈ ${per}\nВыгода к blue: {pct}",
+        "GUIDE_P2P_BUY_STEPS": "<b>Шаги — Binance P2P:</b>\n1️⃣ Зарегистрируйтесь на Binance и пройдите верификацию (DNI/паспорт)\n2️⃣ Раздел P2P → «Купить USDT» → способ оплаты: Mercado Pago / банковский перевод\n3️⃣ Выберите объявление с высоким ✓рейтингом (⩾95%) и подходящими лимитами\n4️⃣ Введите сумму в ARS → «Купить» — USDT блокируются площадкой (эскроу)\n5️⃣ Переведите песо по реквизитам продавца\n6️⃣ Нажмите «Оплатил» и дождитесь подтверждения — USDT на спот-кошельке",
+        "GUIDE_P2P_SELL_STEPS": "<b>Шаги — Binance P2P:</b>\n1️⃣ USDT должны быть на спот-кошельке Binance\n2️⃣ P2P → «Продать USDT» → способ, которым получите песо\n3️⃣ Выберите покупателя с высоким ✓рейтингом\n4️⃣ Введите сумму → «Продать» — USDT блокируются\n5️⃣ Дождитесь перевода НА ВАШ счёт (проверьте зачисление!)\n6️⃣ Только после этого подтверждайте получение — USDT уходят покупателю",
+        "GUIDE_P2P_WARN": "⚠️ Никогда не подтверждайте оплату до фактического перевода и не выходите из чата площадки: защита эскроу работает только внутри неё.",
+        "GUIDE_BUY_USDT_ALTS": "<b>Альтернативы:</b> аргентинские приложения (Lemon, Belo, Buenbit, Ripio) — депозит в песо и покупка USDT в пару касаний; биржа Bitso.",
+        "GUIDE_SELL_USDT_ALTS": "<b>Альтернативы:</b> те же приложения с выводом в ARS; агрегат CriptoYa (/usdt) показывает, где сейчас лучший курс.",
+        "GUIDE_BUY_USD_HEAD": "Курсы ПОКУПКИ доллара сейчас:",
+        "GUIDE_SELL_USD_HEAD": "Курсы ПРОДАЖИ доллара сейчас:",
+        "GUIDE_BEST_LINE": "🥇 Выгоднее всего: {name} — ${price}",
+        "GUIDE_MEP_STEPS": "<b>Шаги — доллар MEP (биржа):</b>\n1️⃣ Откройте счёт у брокера с доступом к облигациям (InvertirOnline, Balanz, Bull Market)\n2️⃣ Внесите песо (перевод из банка)\n3️⃣ Купите облигацию в ARS (например, AL30/AL35 в песо)\n4️⃣ Продайте её в USD — доллары придут на ваш счёт (это и есть курс MEP)\n⏱ Обычно 1–2 рабочих дня; комиссия брокера ~0,5–1%",
+        "GUIDE_CUEVA_STEPS": "<b>Шаги — cueva (рынок blue):</b>\n1️⃣ Найдите проверенную cueva (по рекомендациям)\n2️⃣ Уточните курс compra по телефону/WhatsApp до визита\n3️⃣ Обмен в офисе: пусть песо пересчитают при вас\n4️⃣ Большие суммы — предупреждайте заранее или дробите",
+        "GUIDE_BUY_USD_ALTS": "<b>Альтернативы:</b> 🏦 банк — курс oficial, нужен счёт; 💵 cueva — наличные сразу по курсу blue; в микросентро Буэнос-Айреса (улица Florida) сравните несколько.",
+        "GUIDE_SELL_USD_ALTS": "<b>Альтернативы:</b> 🏦 банк — курс oficial покупки (обычно ниже blue); 📈 если есть брокерский счёт — продать облигацию в USD и купить в ARS (MEP).",
+        "GUIDE_CASH_WARN": "⚠️ С наличными: проверяйте купюры (встречаются фальшивые $100/$50), не меняйте на улице — только в помещении. Наличные суммы подпадают под нормы AFIP/таможни.",
+        "GUIDE_FOOTER": "Курсы в реальном времени: /rates и /usdt · Проверьте комиссии и лимиты перед операцией",
     },
 }
 

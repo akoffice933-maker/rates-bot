@@ -36,6 +36,7 @@ async def set_bot_commands(bot: Bot) -> None:
             BotCommand(command="spread", description="Brecha USDT vs Blue"),
             BotCommand(command="alert", description="Alertas de brecha y cotización"),
             BotCommand(command="digest", description="Digesta diaria"),
+            BotCommand(command="how", description="Cómo cambiar / как обменять"),
             BotCommand(command="lang", description="Idioma / язык"),
             BotCommand(command="help", description="Ayuda"),
         ]
