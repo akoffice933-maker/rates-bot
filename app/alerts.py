@@ -36,6 +36,33 @@ class MetricSpec:
     kind: str                                  # spread | abs
     name_key: str                              # i18n-ключ названия
     eval: Callable[[Snapshot], float | None]   # значение метрики по снапшоту
+    hysteresis_min: float = 0.5                # минимум гистерезиса; для USD-пар — 0.001
+
+
+def _uu_best_bid(s: Snapshot) -> float | None:
+    """Лучший курс продажи USDT за USD — безнал (CriptoYa USDT/USD, лучший bid)."""
+    m = s.usdt_usd
+    return m.bids[0].bid if m and m.bids else None
+
+
+def _uu_best_ask(s: Snapshot) -> float | None:
+    """Лучший курс покупки USDT за USD — безнал (лучший ask)."""
+    m = s.usdt_usd
+    return m.asks[0].ask if m and m.asks else None
+
+
+def _uu_cash_sell(s: Snapshot) -> float | None:
+    """Продажа USDT за наличный USD (расчёт): лучший bid USDT/ARS ÷ blue venta."""
+    if s.usdt and s.usdt.bids and s.blue and s.blue.sell:
+        return s.usdt.bids[0].bid / s.blue.sell
+    return None
+
+
+def _uu_cash_buy(s: Snapshot) -> float | None:
+    """Покупка USDT за наличный USD (расчёт): лучший ask USDT/ARS ÷ blue compra."""
+    if s.usdt and s.usdt.asks and s.blue and s.blue.buy:
+        return s.usdt.asks[0].ask / s.blue.buy
+    return None
 
 
 METRICS: dict[str, MetricSpec] = {
@@ -45,6 +72,11 @@ METRICS: dict[str, MetricSpec] = {
     "blue_sellusd": MetricSpec("abs", "M_BLUE_SELLUSD", lambda s: s.blue.buy if s.blue else None),
     "usdt_buy": MetricSpec("abs", "M_USDT_BUY", lambda s: s.usdt.median_ask if s.usdt else None),
     "usdt_sell": MetricSpec("abs", "M_USDT_SELL", lambda s: s.usdt.median_bid if s.usdt else None),
+    # USDT ⇄ USD (арбитражный цикл: продать дорого → купить обратно дёшево)
+    "usdtusd_sell": MetricSpec("abs", "M_USDTUSD_SELL", _uu_best_bid, 0.001),
+    "usdtusd_buy": MetricSpec("abs", "M_USDTUSD_BUY", _uu_best_ask, 0.001),
+    "usdtusd_cash_sell": MetricSpec("abs", "M_USDTUSD_CASH_SELL", _uu_cash_sell, 0.001),
+    "usdtusd_cash_buy": MetricSpec("abs", "M_USDTUSD_CASH_BUY", _uu_cash_buy, 0.001),
 }
 METRICS_ORDER = tuple(METRICS)  # порядок кнопок = порядок объявления
 
@@ -65,9 +97,11 @@ class AlertManager:
         self._hysteresis_pct = hysteresis_pct
 
     def _hysteresis(self, alert: Alert) -> float:
-        if METRICS[alert.metric].kind == "spread":
+        spec = METRICS[alert.metric]
+        if spec.kind == "spread":
             return self._hysteresis_pct
-        return max(alert.threshold * 0.001, 0.5)  # ~0,1 % от порога, но не меньше 0,5 ARS
+        # ~0,1 % от порога; минимум зависит от метрики (ARS — 0,5; USD-пары — 0,001)
+        return max(alert.threshold * 0.001, spec.hysteresis_min)
 
     async def check(self, snap: Snapshot, bot: Sender | None = None) -> list[str]:
         """Проверить все активные алерты по снапшоту; вернуть отправленные тексты."""
@@ -128,10 +162,14 @@ def fired_text(alert: Alert, value: float, snap: Snapshot, lang: str) -> str:
         th = fmt.pct(alert.threshold, lang, 1)
         context = _spread_context(alert, snap, lang)
     else:
-        title = t(lang, "ALERT_FIRED_ABS_TITLE", metric=name, value=f"${fmt.money(value, lang)}")
+        dec = 4 if alert.metric.startswith("usdtusd") else 2
+        title = t(lang, "ALERT_FIRED_ABS_TITLE", metric=name, value=f"${fmt.money(value, lang, dec)}")
         op = "⩾" if alert.direction == "above" else "⩽"
-        th = f"{op} ${fmt.money(alert.threshold, lang)}"
-        context = _abs_context(snap, lang)
+        th = f"{op} ${fmt.money(alert.threshold, lang, dec)}"
+        if alert.metric.startswith("usdtusd"):
+            context = _usdtusd_context(snap, lang)
+        else:
+            context = _abs_context(snap, lang)
     lines = [
         f"<b>{title}</b>",
         t(lang, "ALERT_THRESHOLD_NOTE", th=th),
@@ -168,13 +206,38 @@ def _abs_context(snap: Snapshot, lang: str) -> list[str]:
     return lines
 
 
+def _usdtusd_context(snap: Snapshot, lang: str) -> list[str]:
+    """Контекст для алертов USDT⇄USD: обе стороны безнала + наличный расчёт."""
+    lines: list[str] = []
+    m = snap.usdt_usd
+    if m:
+        if m.asks:
+            q = m.asks[0]
+            lines.append(f"• {t(lang, 'USDTUSD_CTX_BUY')}: ${fmt.money(q.ask, lang, 4)} — {q.name}")
+        if m.bids:
+            q = m.bids[0]
+            lines.append(f"• {t(lang, 'USDTUSD_CTX_SELL')}: ${fmt.money(q.bid, lang, 4)} — {q.name}")
+    if snap.usdt and snap.blue:
+        if snap.usdt.asks and snap.blue.buy:
+            lines.append(
+                f"• {t(lang, 'USDTUSD_CTX_CASH_BUY')}: "
+                f"${fmt.money(snap.usdt.asks[0].ask / snap.blue.buy, lang, 4)}"
+            )
+        if snap.usdt.bids and snap.blue.sell:
+            lines.append(
+                f"• {t(lang, 'USDTUSD_CTX_CASH_SELL')}: "
+                f"${fmt.money(snap.usdt.bids[0].bid / snap.blue.sell, lang, 4)}"
+            )
+    return lines or _abs_context(snap, lang)
+
+
 async def alert_worker(
     bot: Sender, service, manager: AlertManager, digest=None, interval_seconds: int = 60
 ) -> None:
     """Фоновый цикл: тёплый кэш + проверка алертов + отправка дайджестов."""
     while True:
         try:
-            snap = await service.get_snapshot()
+            snap = await service.get_snapshot_full()
             await manager.check(snap, bot=bot)
             if digest is not None:
                 await digest.check(bot, snap)

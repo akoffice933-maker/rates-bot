@@ -201,6 +201,25 @@ def usdtusd_text(view: UsdtUsdView, lang: str, now: datetime | None = None) -> s
     lines = _stale_banner(snap, lang, now)
     lines += [f"<b>{t(lang, 'USDTUSD_TITLE')}</b>", ""]
 
+    if has_cashless and m.asks and m.bids:
+        # арбитражный цикл: продать USDT по лучшему bid, купить обратно по лучшему ask
+        # (разные площадки — потому и появляется положительная разница)
+        buy_q, sell_q = m.asks[0], m.bids[0]
+        cycle_pct = (sell_q.bid - buy_q.ask) / buy_q.ask * 100
+        lines += [
+            f"<b>{t(lang, 'USDTUSD_ARB_TITLE')}</b>",
+            t(
+                lang,
+                "USDTUSD_ARB_LINE",
+                sell_venue=sell_q.name,
+                sell_price=fmt.money(sell_q.bid, lang, 4),
+                buy_venue=buy_q.name,
+                buy_price=fmt.money(buy_q.ask, lang, 4),
+            ),
+            t(lang, "USDTUSD_ARB_PCT", pct=fmt.pct(cycle_pct, lang, 2)),
+            "",
+        ]
+
     if has_cashless:
         lines.append(f"<b>{t(lang, 'USDTUSD_CASHLESS', n=str(len(m.all_venues)))}</b>")
         lines.append("")

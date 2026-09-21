@@ -46,6 +46,7 @@ _SWAPPABLE = ("rates", "usdt")
 _DIRECTIONS = ("above", "below")
 _SPREAD_MIN, _SPREAD_MAX = 0.5, 20.0
 _ABS_MIN, _ABS_MAX = 100.0, 1_000_000.0
+_UU_MIN, _UU_MAX = 0.8, 1.5          # пороги USDT/USD, USD за 1 USDT
 
 
 class AlertCustom(StatesGroup):
@@ -88,13 +89,21 @@ async def _edit(cb: CallbackQuery, text: str, kb) -> None:
             raise
 
 
-def _abs_presets(current: float, direction: str) -> list[float]:
-    """Пресеты значений вокруг текущего курса: для above — вверх, для below — вниз."""
+def _is_uu(metric: str) -> bool:
+    """Метрика пары USDT/USD (порог ~1 USD, а не ~1500 ARS)."""
+    return metric.startswith("usdtusd")
+
+
+def _abs_presets(current: float, direction: str, step: float = 50.0) -> list[float]:
+    """Пресеты значений вокруг текущего курса: для above — вверх, для below — вниз.
+
+    Шаг зависит от метрики: ARS-курсы — 50, USD-пары USDT/USD — 0,01.
+    """
     if direction == "above":
-        base = math.ceil(current / 10) * 10
-        return [base, base + 50, base + 100]
-    base = math.floor(current / 10) * 10
-    return [base, base - 50, base - 100]
+        base = math.ceil(current / step) * step
+        return [base, base + step, base + 2 * step]
+    base = math.floor(current / step) * step
+    return [base, base - step, base - 2 * step]
 
 
 # ---------- экраны курсов ----------
@@ -213,14 +222,15 @@ async def cb_alert_menu(cb: CallbackQuery, storage: BotStorage) -> None:
 @router.callback_query(F.data == "al:add")
 async def cb_alert_add(cb: CallbackQuery, service: RatesService, storage: BotStorage) -> None:
     lang = storage.get_lang(cb.message.chat.id, config.DEFAULT_LANG)
-    snap = await service.get_snapshot()
+    snap = await service.get_snapshot_full()
     lines = [f"<b>{t(lang, 'ALERT_METRIC_PROMPT')}</b>", ""]
     for metric, spec in METRICS.items():
         value = spec.eval(snap)
         if spec.kind == "spread":
             shown = fmt.pct(value, lang)
         else:
-            shown = f"${fmt.money(value, lang)}" if value is not None else "—"
+            dec = 4 if _is_uu(metric) else 2
+            shown = f"${fmt.money(value, lang, dec)}" if value is not None else "—"
         lines.append(f"{t(lang, spec.name_key)}: {shown}")
     await _edit(cb, "\n".join(lines), alert_categories_kb(lang))
     await cb.answer()
@@ -234,7 +244,7 @@ async def cb_alert_category(cb: CallbackQuery, service: RatesService, storage: B
         await cb.answer()
         return
     lang = storage.get_lang(cb.message.chat.id, config.DEFAULT_LANG)
-    snap = await service.get_snapshot()
+    snap = await service.get_snapshot_full()
     current = spec.eval(snap)
 
     if spec.kind == "spread":
@@ -245,7 +255,8 @@ async def cb_alert_category(cb: CallbackQuery, service: RatesService, storage: B
         kb = alert_value_kb(lang, presets, metric, "")
     else:
         # экран направления (выше/ниже)
-        cur_shown = f"${fmt.money(current, lang)}" if current is not None else "—"
+        dec = 4 if _is_uu(metric) else 2
+        cur_shown = f"${fmt.money(current, lang, dec)}" if current is not None else "—"
         text = f"<b>{t(lang, 'ALERT_DIR_PROMPT')}</b>\n\n{t(lang, spec.name_key)}: {cur_shown}"
         kb = alert_direction_kb(lang, metric)
     await _edit(cb, text, kb)
@@ -265,19 +276,21 @@ async def cb_alert_direction(cb: CallbackQuery, service: RatesService, storage: 
         await cb.answer()
         return
     lang = storage.get_lang(cb.message.chat.id, config.DEFAULT_LANG)
-    snap = await service.get_snapshot()
+    snap = await service.get_snapshot_full()
     current = spec.eval(snap)
 
     op = "⩾" if direction == "above" else "⩽"
     if current is None:
         await cb.answer(t(lang, "NO_DATA"), show_alert=True)
         return
+    dec = 4 if _is_uu(metric) else 2
+    step = 0.01 if _is_uu(metric) else 50.0
     text = (
         f"<b>{t(lang, 'ALERT_VALUE_PROMPT')}</b>\n\n"
-        f"{t(lang, spec.name_key)}: ${fmt.money(current, lang)}"
+        f"{t(lang, spec.name_key)}: ${fmt.money(current, lang, dec)}"
     )
     presets = [
-        (f"{op} ${fmt.money(v, lang)}", v) for v in _abs_presets(current, direction)
+        (f"{op} ${fmt.money(v, lang, dec)}", v) for v in _abs_presets(current, direction, step)
     ]
     await _edit(cb, text, alert_value_kb(lang, presets, metric, direction))
     await cb.answer()
@@ -304,7 +317,9 @@ async def cb_alert_preset(cb: CallbackQuery, storage: BotStorage) -> None:
 
     chat_id = cb.message.chat.id
     lang = storage.get_lang(chat_id, config.DEFAULT_LANG)
-    added = storage.add_alert(chat_id, metric, spec.kind, round(value, 2), direction)
+    added = storage.add_alert(
+        chat_id, metric, spec.kind, round(value, 4 if _is_uu(metric) else 2), direction
+    )
     text, kb = _alert_menu(lang, storage.list_alerts(chat_id))
     await _edit(cb, text, kb)
     await cb.answer("✅" if added else "⚠️")
@@ -326,9 +341,12 @@ async def cb_alert_custom(cb: CallbackQuery, state: FSMContext, storage: BotStor
     await state.set_state(AlertCustom.waiting_threshold)
     await state.update_data(metric=metric, direction=direction)
     lang = storage.get_lang(cb.message.chat.id, config.DEFAULT_LANG)
-    prompt = (
-        t(lang, "ALERT_CUSTOM_PROMPT_ABS") if spec.kind == "abs" else t(lang, "ALERT_CUSTOM_PROMPT")
-    )
+    if spec.kind == "spread":
+        prompt = t(lang, "ALERT_CUSTOM_PROMPT")
+    elif _is_uu(metric):
+        prompt = t(lang, "ALERT_CUSTOM_PROMPT_USD")
+    else:
+        prompt = t(lang, "ALERT_CUSTOM_PROMPT_ABS")
     await cb.message.answer(prompt)
     await cb.answer()
 
@@ -355,6 +373,9 @@ async def alert_custom_input(message: Message, state: FSMContext, storage: BotSt
     if spec.kind == "spread":
         ok = _SPREAD_MIN <= value <= _SPREAD_MAX
         bad_key = "ALERT_CUSTOM_BAD"
+    elif _is_uu(metric):
+        ok = _UU_MIN <= value <= _UU_MAX
+        bad_key = "ALERT_CUSTOM_BAD_USD"
     else:
         ok = _ABS_MIN <= value <= _ABS_MAX
         bad_key = "ALERT_CUSTOM_BAD_ABS"
@@ -362,7 +383,9 @@ async def alert_custom_input(message: Message, state: FSMContext, storage: BotSt
         await message.answer(t(lang, bad_key))
         return
 
-    added = storage.add_alert(message.chat.id, metric, spec.kind, round(value, 1), direction)
+    added = storage.add_alert(
+        message.chat.id, metric, spec.kind, round(value, 4 if _is_uu(metric) else 1), direction
+    )
     await state.clear()
 
     await message.answer(t(lang, "ALERT_ADDED" if added else "ALERT_EXISTS"))

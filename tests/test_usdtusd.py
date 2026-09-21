@@ -1,7 +1,11 @@
 """Экран /usdtusd: безнал (CriptoYa USDT/USD) + наличный кросс через blue."""
 from datetime import datetime, timezone
 
+import pytest
+
 from app import render
+from app.alerts import AlertManager, METRICS, fired_text
+from app.storage import Alert
 from app.keyboards import main_menu, uu_kb
 from app.service import RatesService, Snapshot, UsdtMarket, UsdtUsdView, build_market
 from app.sources import criptoya
@@ -154,3 +158,80 @@ def test_menu_has_usdtusd_button():
 def test_uu_kb_callbacks():
     buttons = [b for row in uu_kb("ru").inline_keyboard for b in row]
     assert [b.callback_data for b in buttons] == ["uu:rfsh", "scr:links", "menu:main"]
+
+
+# ---------- арбитражный цикл ----------
+
+def test_arb_block():
+    """Продать по лучшему bid (Ripio) -> купить обратно по лучшему ask (Xapo): +3,72%."""
+    text = render.usdtusd_text(make_view(), "ru", now=NOW)
+    assert "♻️ Арбитраж: цикл USD → USDT → USD" in text
+    assert "продать USDT: Ripio по 1,0386" in text
+    assert "купить обратно: Xapo по 1,0014" in text
+    assert "+3,71 %" in text
+
+
+def test_arb_block_es():
+    text = render.usdtusd_text(make_view(), "es", now=NOW)
+    assert "♻️ Arbitraje: ciclo USD → USDT → USD" in text
+    assert "vender USDT: Ripio a 1,0386" in text
+
+
+# ---------- метрики алертов USDT⇄USD ----------
+
+def _arb_snap() -> Snapshot:
+    market = UsdtMarket(
+        all_venues=(),
+        asks=(VenueQuote(key="mexcp2p", name="MEXC P2P", ask=1593.25, bid=None, time=NOW),),
+        bids=(VenueQuote(key="satoshitango", name="SatoshiTango", ask=None, bid=1595.41, time=NOW),),
+        median_ask=1593.25,
+        median_bid=1595.41,
+    )
+    return Snapshot(
+        fetched_at=NOW,
+        blue=RatePair(buy=1517.0, sell=1550.0),
+        usdt=market,
+        usdt_usd=build_market(criptoya.parse(CRIPTOYA_USD, NOW)),
+    )
+
+
+def test_metrics_eval_usdtusd():
+    snap = _arb_snap()
+    assert METRICS["usdtusd_sell"].eval(snap) == pytest.approx(1.0386)   # Ripio bid
+    assert METRICS["usdtusd_buy"].eval(snap) == pytest.approx(1.0014)   # Xapo ask
+    assert METRICS["usdtusd_cash_sell"].eval(snap) == pytest.approx(1595.41 / 1550.0)
+    assert METRICS["usdtusd_cash_buy"].eval(snap) == pytest.approx(1593.25 / 1517.0)
+    # без данных метрика просто не определена — алерт не проверяется
+    for key in ("usdtusd_sell", "usdtusd_buy", "usdtusd_cash_sell", "usdtusd_cash_buy"):
+        assert METRICS[key].eval(Snapshot(fetched_at=NOW)) is None
+
+
+def test_hysteresis_for_usd_pairs():
+    manager = AlertManager(None)
+    uu = Alert(id=1, chat_id=1, metric="usdtusd_sell", kind="abs", threshold=1.03,
+               direction="above", enabled=True, active=False, last_fired_at=None)
+    assert manager._hysteresis(uu) == pytest.approx(0.00103)   # ~0,1%, а не 0,5 ARS
+    ars = Alert(id=2, chat_id=1, metric="blue_buyusd", kind="abs", threshold=1500.0,
+                direction="above", enabled=True, active=False, last_fired_at=None)
+    assert manager._hysteresis(ars) == pytest.approx(1.5)      # прежнее поведение ARS
+
+
+def test_fired_text_usdtusd():
+    alert = Alert(id=3, chat_id=1, metric="usdtusd_sell", kind="abs", threshold=1.03,
+                  direction="above", enabled=True, active=False, last_fired_at=None)
+    text = fired_text(alert, 1.0386, _arb_snap(), "ru")
+    assert "$1,0386" in text and "⩾ $1,03" in text
+    assert "Ripio" in text and "Xapo" in text      # обе стороны безнала в контексте
+    assert "нал, расчёт" in text                   # + наличный расчёт
+
+
+async def test_snapshot_full_separate_from_plain():
+    """Обычный снапшот не платит запросом USDT/USD; полный — содержит рынок."""
+    service = RatesService(FakeClient(usd=CRIPTOYA_USD, ars=CRIPTOYA_ARS), cache_ttl_seconds=60)
+    plain = await service.get_snapshot()
+    assert plain.usdt_usd is None
+    full = await service.get_snapshot_full()
+    assert full.usdt_usd and full.usdt_usd.asks[0].name == "Xapo"
+    # и тот же рынок доезжает до экрана
+    view = await service.get_usdtusd_view()
+    assert view.usd is not None and view.usd.bids[0].name == "Ripio"

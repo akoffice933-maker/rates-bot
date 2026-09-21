@@ -23,7 +23,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import statistics
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timedelta, timezone
 from typing import Any, Protocol
 
@@ -75,12 +75,17 @@ class Snapshot:
     ccl: RatePair | None = None
     tarjeta: RatePair | None = None
     usdt: UsdtMarket | None = None
+    usdt_usd: UsdtMarket | None = None     # рынок пары USDT/USD (для /usdtusd и алертов)
     source_errors: tuple[str, ...] = ()
 
     @property
     def is_empty(self) -> bool:
         has_usdt = self.usdt and (self.usdt.asks or self.usdt.bids)
-        return not (self.blue or self.oficial or self.mep or self.ccl or self.tarjeta or has_usdt)
+        has_usdt_usd = self.usdt_usd and (self.usdt_usd.asks or self.usdt_usd.bids)
+        return not (
+            self.blue or self.oficial or self.mep or self.ccl or self.tarjeta
+            or has_usdt or has_usdt_usd
+        )
 
     def spread_sell_pct(self) -> float | None:
         """На сколько % больше песо даёт продажа USDT (медиана bid)
@@ -247,11 +252,22 @@ class RatesService:
             errors=tuple(errors),
         )
 
-    async def get_usdtusd_view(self, force: bool = False) -> UsdtUsdView:
-        """Данные для экрана /usdtusd: снапшот (blue + USDT/ARS) + пара USDT/USD."""
+    async def get_snapshot_full(self, force: bool = False) -> Snapshot:
+        """Снапшот + рынок USDT/USD (для алертов и экрана /usdtusd).
+
+        Отдельный метод: обычные экраны не платят лишним запросом,
+        а воркер алертов получает всё сразу (кэш общий).
+        """
         snap = await self.get_snapshot(force=force)
         quotes = await self._get_criptoya_usd(force)
-        return UsdtUsdView(snap=snap, usd=build_market(quotes) if quotes else None)
+        if quotes is None:
+            return snap
+        return replace(snap, usdt_usd=build_market(quotes))
+
+    async def get_usdtusd_view(self, force: bool = False) -> UsdtUsdView:
+        """Данные для экрана /usdtusd: снапшот (blue + USDT/ARS) + пара USDT/USD."""
+        snap = await self.get_snapshot_full(force=force)
+        return UsdtUsdView(snap=snap, usd=snap.usdt_usd)
 
     async def _get_criptoya_usd(self, force: bool) -> list[VenueQuote] | None:
         """CriptoYa USDT/USD: тот же кэш/TTL, при сбое — последний успешный."""
