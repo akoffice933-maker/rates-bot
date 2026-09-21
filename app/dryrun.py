@@ -8,13 +8,11 @@ import asyncio
 import os
 import re
 import tempfile
-from datetime import datetime, timedelta, timezone
-from zoneinfo import ZoneInfo
+from datetime import datetime, timezone
 
 import aiohttp
 
 from . import config, render
-from .alerts import AlertManager
 from .digest import AR_TZ, DigestManager, digest_text
 from .http_client import AiohttpClient
 from .p2p import BinanceP2PService

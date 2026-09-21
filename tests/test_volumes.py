@@ -48,7 +48,7 @@ def test_screen_kb_volume_buttons():
     kb = screen_kb("ru", "usdt", "direct", volume=100)
     flat = [(b.text, b.callback_data) for row in kb.inline_keyboard for b in row]
     texts = [t for t, _ in flat]
-    assert f"✅ 100" in texts and "💵 5000" in texts
+    assert "✅ 100" in texts and "💵 5000" in texts
     assert ("vol:1000",) in [(cd,) for _, cd in flat]
     # на экране курсов кнопок объёма нет
     kb_rates = screen_kb("ru", "rates", "direct")

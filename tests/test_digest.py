@@ -4,7 +4,6 @@ from __future__ import annotations
 import os
 import tempfile
 from datetime import datetime, timezone
-from zoneinfo import ZoneInfo
 
 from app.digest import AR_TZ, DigestManager, digest_text
 from app.service import Snapshot, UsdtMarket

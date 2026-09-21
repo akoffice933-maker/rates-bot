@@ -1,5 +1,9 @@
 # Rates Bot — телеграм-бот курсов доллара и USDT в Аргентине
 
+[![CI](https://github.com/akoffice933-maker/rates-bot/actions/workflows/ci.yml/badge.svg)](https://github.com/akoffice933-maker/rates-bot/actions/workflows/ci.yml)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 MVP-блок проекта-агрегатора (ТЗ v1.1): телеграм-бот, который в реальном времени сравнивает курсы USD и USDT в Аргентине. Запускается long polling'ом — публичный IP и вебхуки не нужны.
 
 ## Что умеет
@@ -237,6 +241,21 @@ rates-bot/
 | `BINANCE_P2P_MIN_COMPLETION` | `0.90` | фильтр объявлений по completed-rate |
 | `BINANCE_P2P_PAGES` / `BINANCE_P2P_ROWS` | `2` / `10` | глубина загрузки объявлений |
 | `LOG_LEVEL` | `INFO` | логирование |
+
+## CI и качество
+
+- **GitHub Actions** (`.github/workflows/ci.yml`): на каждый push/PR — ruff (lint) → pytest на Python 3.11/3.12/3.13 → сборка Docker-образа;
+- тесты полностью офлайн: парсеры проверяются на **живых фикстурах** (реальные ответы источников, `tests/fixtures/`);
+- **live-smoke** (`python -m app.dryrun` против реальных API) — раз в неделю по расписанию и вручную (Actions → Live smoke → Run workflow), не блокирует релизы;
+- mypy — в планах (постепенная типизация).
+
+## Контекст проекта
+
+Ревью ТЗ v1.1 и методология (выбросы, медианы, семантика сторон, спреды): [docs/tz-review-v1.2.md](docs/tz-review-v1.2.md).
+
+## Лицензия
+
+[MIT](LICENSE) © akoffice933-maker
 
 ## Ограничения MVP и роадмап
 

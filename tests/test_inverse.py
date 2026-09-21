@@ -11,7 +11,7 @@ from app import render
 from app.service import RatesService
 from app.storage import BotStorage
 
-from .test_service import FakeClient, BLUELYTICS, DOLARAPI
+from .test_service import FakeClient
 
 NOW = datetime(2026, 9, 21, 12, 0, tzinfo=timezone.utc)
 
