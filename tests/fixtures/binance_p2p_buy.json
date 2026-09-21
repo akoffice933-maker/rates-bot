@@ -1,0 +1,46 @@
+{
+  "code": "000000",
+  "message": null,
+  "total": 3,
+  "data": [
+    {
+      "adv": {
+        "advNo": "211",
+        "price": "1589.00",
+        "surplusAmount": "40000",
+        "minSingleTransAmount": "100000",
+        "maxSingleTransAmount": "3000000",
+        "tradeMethods": [
+          {"identifier": "MercadoPago", "name": "Mercado Pago"}
+        ]
+      },
+      "advertiser": {"nickName": "CompraYA", "monthFinishRate": "0.99", "monthOrderCount": "310"}
+    },
+    {
+      "adv": {
+        "advNo": "212",
+        "price": "1587.50",
+        "surplusAmount": "5000",
+        "minSingleTransAmount": "50000",
+        "maxSingleTransAmount": "800000",
+        "tradeMethods": [
+          {"identifier": "BankTransfer", "name": "Transferencia bancaria"}
+        ]
+      },
+      "advertiser": {"nickName": "PesoRapido", "monthFinishRate": "0.95", "monthOrderCount": "77"}
+    },
+    {
+      "adv": {
+        "advNo": "213",
+        "price": "1586.00",
+        "surplusAmount": "900",
+        "minSingleTransAmount": "10000",
+        "maxSingleTransAmount": "150000",
+        "tradeMethods": [
+          {"identifier": "UalA", "name": "Ualá"}
+        ]
+      },
+      "advertiser": {"nickName": "SmallFish", "monthFinishRate": "0.91", "monthOrderCount": "12"}
+    }
+  ]
+}

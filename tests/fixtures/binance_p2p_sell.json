@@ -1,0 +1,47 @@
+{
+  "code": "000000",
+  "message": null,
+  "total": 3,
+  "data": [
+    {
+      "adv": {
+        "advNo": "111",
+        "price": "1590.00",
+        "surplusAmount": "1250.5",
+        "minSingleTransAmount": "100000",
+        "maxSingleTransAmount": "5000000",
+        "tradeMethods": [
+          {"identifier": "MercadoPago", "name": "Mercado Pago"},
+          {"identifier": "BankTransfer", "name": "Transferencia bancaria"}
+        ]
+      },
+      "advertiser": {"nickName": "TraderOne", "monthFinishRate": "0.97", "monthOrderCount": "150"}
+    },
+    {
+      "adv": {
+        "advNo": "112",
+        "price": "1591.50",
+        "surplusAmount": "300",
+        "minSingleTransAmount": "50000",
+        "maxSingleTransAmount": "1000000",
+        "tradeMethods": [
+          {"identifier": "MercadoPago", "name": "Mercado Pago"}
+        ]
+      },
+      "advertiser": {"nickName": "DolarFast", "monthFinishRate": "0.92", "monthOrderCount": "42"}
+    },
+    {
+      "adv": {
+        "advNo": "113",
+        "price": "1588.00",
+        "surplusAmount": "80",
+        "minSingleTransAmount": "10000",
+        "maxSingleTransAmount": "200000",
+        "tradeMethods": [
+          {"identifier": "Lemon", "name": "Lemon"}
+        ]
+      },
+      "advertiser": {"nickName": "LowRate", "monthFinishRate": "0.85", "monthOrderCount": "5"}
+    }
+  ]
+}
