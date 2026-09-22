@@ -30,6 +30,7 @@ from .keyboards import (
     main_menu,
     screen_kb,
     uu_kb,
+    cmp_kb,
 )
 from .service import RatesService
 from .digest import DIGEST_HOURS
@@ -164,6 +165,41 @@ async def cb_uu_rfsh(cb: CallbackQuery, service: RatesService, storage: BotStora
         await cb.answer(t(lang, "NO_DATA"), show_alert=True)
         return
     await _edit(cb, text, uu_kb(lang))
+    await cb.answer("✅")
+
+
+async def _compare_screen(message: Message, service: RatesService,
+                         bestchange: BestChangeService, p2p: BinanceP2PService,
+                         storage: BotStorage, force: bool = False) -> None:
+    lang = storage.get_lang(message.chat.id, config.DEFAULT_LANG)
+    snap = await service.get_snapshot(force=force)
+    bc_sell = await bestchange.get("usdt_mp", force=force)
+    bc_buy = await bestchange.get("mp_usdt", force=force)
+    p2p_res = await p2p.get(force=force)
+    text = render.compare_text(snap, bc_sell, bc_buy, p2p_res, lang)
+    if text is None:
+        await message.answer(t(lang, "NO_DATA"))
+        return
+    await message.answer(text, reply_markup=cmp_kb(lang))
+
+
+@router.message(Command("compare"))
+async def cmd_compare(message: Message, service: RatesService, bestchange: BestChangeService,
+                      p2p: BinanceP2PService, storage: BotStorage) -> None:
+    await _compare_screen(message, service, bestchange, p2p, storage)
+
+
+@router.callback_query(F.data == "cmp:scr")
+async def cb_cmp_scr(cb: CallbackQuery, service: RatesService, bestchange: BestChangeService,
+                     p2p: BinanceP2PService, storage: BotStorage) -> None:
+    await _compare_screen(cb.message, service, bestchange, p2p, storage)
+    await cb.answer()
+
+
+@router.callback_query(F.data == "cmp:rfsh")
+async def cb_cmp_rfsh(cb: CallbackQuery, service: RatesService, bestchange: BestChangeService,
+                      p2p: BinanceP2PService, storage: BotStorage) -> None:
+    await _compare_screen(cb.message, service, bestchange, p2p, storage, force=True)
     await cb.answer("✅")
 
 

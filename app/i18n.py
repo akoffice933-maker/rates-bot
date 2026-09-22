@@ -16,6 +16,7 @@ STRINGS: dict[str, dict[str, str]] = {
             "/rates — cotizaciones del dólar (oficial, blue, MEP, CCL, tarjeta)\n"
             "/usdt — mejores precios de USDT/ARS\n"
             "/usdtusd — USDT ⇄ USD: efectivo y sin efectivo\n"
+            "/compare — USDT/ARS en todas las fuentes\n"
             "/spread — brecha USDT vs Blue\n"
             "/alert — alertas de brecha y de cotización\n"
             "/p2p — anuncios en vivo de Binance P2P\n"
@@ -97,6 +98,16 @@ STRINGS: dict[str, dict[str, str]] = {
         "M_USDTUSD_CASH_BUY": "Compra USDT por USD (efectivo)",
         "ALERT_CUSTOM_PROMPT_USD": "Escribí el valor en USD por 1 USDT (por ejemplo 1,03):",
         "ALERT_CUSTOM_BAD_USD": "⛔️ No entendí el número. Ejemplo: 1,03 (entre 0,8 y 1,5).",
+        "BTN_COMPARE": "⚖️ Comparar",
+        "COMPARE_TITLE": "⚖️ USDT/ARS — comparación de fuentes",
+        "CMP_SELL_HDR": "📤 Vender USDT → recibir ARS (mejor primero):",
+        "CMP_BUY_HDR": "📥 Comprar USDT por ARS (mejor primero):",
+        "CMP_UNAVAILABLE": "no disponible ahora",
+        "CMP_VS_BEST": "({pct} vs el mejor)",
+        "CMP_NOTE": (
+            "BestChange — Mercado Pago ARS (límites y reservas en /bestchange) · "
+            "CriptoYa — precios con comisiones · Binance P2P — anuncios"
+        ),
         "BTN_USDTUSD": "💵 USDT⇄USD",
         "BTN_ALERT": "🔔 Alertas",
         "BTN_ALERT_ADD": "➕ Nueva alerta",
@@ -214,6 +225,7 @@ STRINGS: dict[str, dict[str, str]] = {
             "/rates — курсы доллара (oficial, blue, MEP, CCL, tarjeta)\n"
             "/usdt — лучшие цены USDT/ARS\n"
             "/usdtusd — USDT ⇄ USD: наличные и безнал\n"
+            "/compare — USDT/ARS по всем источникам\n"
             "/spread — спред USDT vs Blue\n"
             "/alert — алерты спреда и курсов\n"
             "/p2p — живые объявления Binance P2P\n"
@@ -295,6 +307,16 @@ STRINGS: dict[str, dict[str, str]] = {
         "M_USDTUSD_CASH_BUY": "Покупка USDT за USD (нал)",
         "ALERT_CUSTOM_PROMPT_USD": "Введи значение в USD за 1 USDT (например 1,03):",
         "ALERT_CUSTOM_BAD_USD": "⛔️ Не понял число. Пример: 1,03 (от 0,8 до 1,5).",
+        "BTN_COMPARE": "⚖️ Сравнить",
+        "COMPARE_TITLE": "⚖️ USDT/ARS — сравнение источников",
+        "CMP_SELL_HDR": "📤 Продать USDT → получить ARS (лучше — сверху):",
+        "CMP_BUY_HDR": "📥 Купить USDT за ARS (лучше — сверху):",
+        "CMP_UNAVAILABLE": "сейчас недоступно",
+        "CMP_VS_BEST": "({pct} к лучшему)",
+        "CMP_NOTE": (
+            "BestChange — Mercado Pago ARS (лимиты и резервы в /bestchange) · "
+            "CriptoYa — цены с комиссиями · Binance P2P — объявления"
+        ),
         "BTN_USDTUSD": "💵 USDT⇄USD",
         "BTN_ALERT": "🔔 Алерты",
         "BTN_ALERT_ADD": "➕ Новый алерт",

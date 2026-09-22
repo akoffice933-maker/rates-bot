@@ -36,10 +36,11 @@ def main_menu(lang: str) -> InlineKeyboardMarkup:
                 InlineKeyboardButton(text=t(lang, "BTN_BESTCHANGE"), callback_data="bc:menu"),
             ],
             [
-                InlineKeyboardButton(text=t(lang, "GUIDE_BTN"), callback_data="gw:menu"),
+                InlineKeyboardButton(text=t(lang, "BTN_COMPARE"), callback_data="cmp:scr"),
                 InlineKeyboardButton(text=t(lang, "BTN_ALERT"), callback_data="al:menu"),
                 InlineKeyboardButton(text=t(lang, "BTN_LANG"), callback_data="scr:lang"),
             ],
+            [InlineKeyboardButton(text=t(lang, "GUIDE_BTN"), callback_data="gw:menu")],
         ]
     )
 
@@ -80,6 +81,17 @@ def screen_kb(
     rows.append([InlineKeyboardButton(text=t(lang, "BTN_LINKS"), callback_data="scr:links")])
     rows.append([InlineKeyboardButton(text=t(lang, "BTN_BACK"), callback_data="menu:main")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def cmp_kb(lang: str) -> InlineKeyboardMarkup:
+    """Экран сравнения источников USDT/ARS."""
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text=t(lang, "BTN_REFRESH"), callback_data="cmp:rfsh")],
+            [InlineKeyboardButton(text=t(lang, "BTN_LINKS"), callback_data="scr:links")],
+            [InlineKeyboardButton(text=t(lang, "BTN_BACK"), callback_data="menu:main")],
+        ]
+    )
 
 
 def uu_kb(lang: str) -> InlineKeyboardMarkup:

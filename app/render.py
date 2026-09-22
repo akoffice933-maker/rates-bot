@@ -13,6 +13,7 @@
 """
 from __future__ import annotations
 
+import html
 from datetime import datetime, timezone
 
 from . import formatting as fmt
@@ -275,6 +276,87 @@ def usdtusd_text(view: UsdtUsdView, lang: str, now: datetime | None = None) -> s
         for key, src_key in (("CRIPTOYA_CREDIT", "criptoya"), ("BLUELYTICS_CREDIT", "bluelytics"))
     )
     lines.append(credit)
+    lines += _tail(snap, lang, now)
+    return "\n".join(lines)
+
+
+# ---------- /compare ----------
+
+
+def _bc_best_row(rows, mode: str):
+    """Лучший обменник BestChange в ARS/USDT: max(receive) для продажи, min(give) для покупки."""
+    if not rows:
+        return None
+    if mode == "sell":
+        return max(rows, key=lambda r: r.receive)
+    return min(rows, key=lambda r: r.give)
+
+
+def _cmp_block(entries: list, header_key: str, lang: str, best_is_max: bool) -> list[str]:
+    """Блок одной стороны: доступные источники сортируются (лучший — 🥇),
+    недоступные честно показываются отдельной строкой."""
+    lines = [f"<b>{t(lang, header_key)}</b>"]
+    avail = [e for e in entries if e[2] is not None]
+    avail.sort(key=lambda e: e[2], reverse=best_is_max)
+    best = avail[0][2] if avail else None
+    for i, (src, venue, price, note) in enumerate(avail, 1):
+        marker = "🥇 " if i == 1 else f"{i}. "
+        tail = ""
+        if best and i > 1:
+            tail = " " + t(lang, "CMP_VS_BEST", pct=fmt.pct((price - best) / best * 100, lang, 1))
+        lines.append(f"{marker}{venue} — ${fmt.money(price, lang)} · {src}{tail}")
+    for src, venue, price, note in entries:
+        if price is None:
+            lines.append(f"⚠️ {src}: {t(lang, 'CMP_UNAVAILABLE')}")
+    return lines + [""]
+
+
+def compare_text(snap: Snapshot, bc_sell, bc_buy, p2p, lang: str, now: datetime | None = None) -> str | None:
+    """USDT/ARS из трёх источников: CriptoYa (35+ площадок), BestChange (Mercado Pago),
+    Binance P2P (объявления). Где выгоднее продать и где дешевле купить."""
+    now = _now(now)
+    m = snap.usdt
+    sell_entries: list[tuple[str, str, float | None, str]] = []
+    buy_entries: list[tuple[str, str, float | None, str]] = []
+
+    if m and m.bids:
+        q = m.bids[0]
+        sell_entries.append(("CriptoYa", venue_link(q.key, q.name), q.bid, ""))
+    if m and m.asks:
+        q = m.asks[0]
+        buy_entries.append(("CriptoYa", venue_link(q.key, q.name), q.ask, ""))
+
+    if bc_sell is not None and bc_sell.ok and bc_sell.rows:
+        row = _bc_best_row(bc_sell.rows, "sell")
+        sell_entries.append(("BestChange", ext_link(row.name, row.click_url), row.receive, ""))
+    if bc_buy is not None and bc_buy.ok and bc_buy.rows:
+        row = _bc_best_row(bc_buy.rows, "buy")
+        buy_entries.append(("BestChange", ext_link(row.name, row.click_url), row.give, ""))
+
+    p2p_ok = p2p is not None and p2p.ok
+    if p2p is not None:
+        ad = p2p.buy_ads[0] if p2p_ok and p2p.buy_ads else None
+        price = ad.price if ad else None
+        venue = html.escape(ad.advertiser) if ad else ""
+        sell_entries.append(("Binance P2P", venue, price, ""))
+        ad = p2p.sell_ads[0] if p2p_ok and p2p.sell_ads else None
+        price = ad.price if ad else None
+        venue = html.escape(ad.advertiser) if ad else ""
+        buy_entries.append(("Binance P2P", venue, price, ""))
+
+    if not any(e[2] is not None for e in sell_entries) and not any(e[2] is not None for e in buy_entries):
+        return None
+
+    lines = _stale_banner(snap, lang, now)
+    lines += [f"<b>{t(lang, 'COMPARE_TITLE')}</b>", ""]
+    lines += _cmp_block(sell_entries, "CMP_SELL_HDR", lang, best_is_max=True)
+    lines += _cmp_block(buy_entries, "CMP_BUY_HDR", lang, best_is_max=False)
+    lines.append(t(lang, "CMP_NOTE"))
+    lines.append("")
+    lines.append(" · ".join(
+        ext_link(t(lang, key), SOURCE_URLS[src_key])
+        for key, src_key in (("CRIPTOYA_CREDIT", "criptoya"), ("BC_CREDIT", "bestchange"))
+    ))
     lines += _tail(snap, lang, now)
     return "\n".join(lines)
 
