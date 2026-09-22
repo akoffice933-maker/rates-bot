@@ -43,6 +43,7 @@ async def set_bot_commands(bot: Bot) -> None:
             BotCommand(command="how", description="Cómo cambiar / как обменять"),
             BotCommand(command="bestchange", description="Intercambiadores BestChange"),
             BotCommand(command="ratesguru", description="Intercambiadores RatesGuru (RUB/USDT)"),
+            BotCommand(command="history", description="Dinámica 24h/7d/30d"),
             BotCommand(command="lang", description="Idioma / язык"),
             BotCommand(command="help", description="Ayuda"),
         ]
@@ -80,6 +81,7 @@ async def run() -> None:
     dp["p2p"] = p2p
     dp["bestchange"] = BestChangeService(client)
     dp["ratesguru"] = RatesGuruService(client)
+    dp["history"] = history
     dp.include_router(router)
 
     await set_bot_commands(bot)

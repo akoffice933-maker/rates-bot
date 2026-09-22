@@ -18,6 +18,7 @@ STRINGS: dict[str, dict[str, str]] = {
             "/usdtusd — USDT ⇄ USD: efectivo y sin efectivo\n"
             "/compare — USDT/ARS en todas las fuentes\n"
             "/ratesguru — intercambiadores RUB/USDT (segundo monitor)\n"
+            "/history — dinámica 24 h / 7 días / 30 días\n"
             "/spread — brecha USDT vs Blue\n"
             "/alert — alertas de brecha y de cotización\n"
             "/p2p — anuncios en vivo de Binance P2P\n"
@@ -99,6 +100,17 @@ STRINGS: dict[str, dict[str, str]] = {
         "M_USDTUSD_CASH_BUY": "Compra USDT por USD (efectivo)",
         "ALERT_CUSTOM_PROMPT_USD": "Escribí el valor en USD por 1 USDT (por ejemplo 1,03):",
         "ALERT_CUSTOM_BAD_USD": "⛔️ No entendí el número. Ejemplo: 1,03 (entre 0,8 y 1,5).",
+        "HIST_TITLE": "📈 Historial — últimos {period}",
+        "HIST_HOURS": "{n} h",
+        "HIST_DAYS": "{n} días",
+        "HIST_CCL": "CCL",
+        "HIST_ARB_CYCLE": "♻️ Ciclo de arbitraje USDT/USD",
+        "HIST_NO_DATA": (
+            "🕰 El historial todavía se está acumulando (el bot lo graba cada 15 min). "
+            "Volvé en unas horas. Gráficos web: /chart.svg"
+        ),
+        "HIST_COVERAGE": "Datos: {points} puntos desde {since}",
+        "BTN_HISTORY": "📈 Historial",
         "WEB_CH_ARS_TITLE": "📈 Blue y USDT/ARS — últimos 7 días",
         "WEB_CH_UU_TITLE": "♻️ USDT/USD — corredor de arbitraje (7 días)",
         "WEB_CH_BLUE": "Blue venta",
@@ -261,6 +273,7 @@ STRINGS: dict[str, dict[str, str]] = {
             "/usdtusd — USDT ⇄ USD: наличные и безнал\n"
             "/compare — USDT/ARS по всем источникам\n"
             "/ratesguru — обменники RUB/USDT (второй монитор)\n"
+            "/history — динамика 24 ч / 7 дн / 30 дн\n"
             "/spread — спред USDT vs Blue\n"
             "/alert — алерты спреда и курсов\n"
             "/p2p — живые объявления Binance P2P\n"
@@ -342,6 +355,17 @@ STRINGS: dict[str, dict[str, str]] = {
         "M_USDTUSD_CASH_BUY": "Покупка USDT за USD (нал)",
         "ALERT_CUSTOM_PROMPT_USD": "Введи значение в USD за 1 USDT (например 1,03):",
         "ALERT_CUSTOM_BAD_USD": "⛔️ Не понял число. Пример: 1,03 (от 0,8 до 1,5).",
+        "HIST_TITLE": "📈 История — последние {period}",
+        "HIST_HOURS": "{n} ч",
+        "HIST_DAYS": "{n} дн",
+        "HIST_CCL": "CCL",
+        "HIST_ARB_CYCLE": "♻️ Арбитражный цикл USDT/USD",
+        "HIST_NO_DATA": (
+            "🕰 История ещё копится (бот записывает каждые 15 мин). "
+            "Загляните через несколько часов. Графики в вебе: /chart.svg"
+        ),
+        "HIST_COVERAGE": "Данных: {points} точек с {since}",
+        "BTN_HISTORY": "📈 История",
         "WEB_CH_ARS_TITLE": "📈 Blue и USDT/ARS — последние 7 дней",
         "WEB_CH_UU_TITLE": "♻️ USDT/USD — арбитражный коридор (7 дней)",
         "WEB_CH_BLUE": "Blue продажа",

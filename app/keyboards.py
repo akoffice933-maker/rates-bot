@@ -11,6 +11,7 @@ from .i18n import t
 from .storage import Alert
 from .sources.bestchange import DIRECTIONS, DIRECTIONS_ORDER
 from .sources.ratesguru import DIRECTIONS as RG_DIRECTIONS, DIRECTIONS_ORDER as RG_ORDER
+from .history import PERIODS, period_label
 from .venue_links import SOURCE_URLS, USD_URLS
 
 # action -> (метка при direct, метка при inverse)
@@ -96,11 +97,30 @@ def cmp_kb(lang: str) -> InlineKeyboardMarkup:
 
 
 def uu_kb(lang: str) -> InlineKeyboardMarkup:
-    """Экран /usdtusd: обновить, источники, меню."""
+    """Экран /usdtusd: обновить, история, источники, меню."""
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [InlineKeyboardButton(text=t(lang, "BTN_REFRESH"), callback_data="uu:rfsh")],
+            [InlineKeyboardButton(text=t(lang, "BTN_HISTORY"), callback_data="hist:scr:168")],
             [InlineKeyboardButton(text=t(lang, "BTN_LINKS"), callback_data="scr:links")],
+            [InlineKeyboardButton(text=t(lang, "BTN_BACK"), callback_data="menu:main")],
+        ]
+    )
+
+
+def hist_kb(lang: str, hours: int) -> InlineKeyboardMarkup:
+    """Экран /history: выбор периода + обновить."""
+    row = [
+        InlineKeyboardButton(
+            text=(f"✅ {period_label(h, lang)}" if h == hours else period_label(h, lang)),
+            callback_data=f"hist:scr:{h}",
+        )
+        for h in PERIODS
+    ]
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            row,
+            [InlineKeyboardButton(text=t(lang, "BTN_REFRESH"), callback_data=f"hist:rfsh:{hours}")],
             [InlineKeyboardButton(text=t(lang, "BTN_BACK"), callback_data="menu:main")],
         ]
     )

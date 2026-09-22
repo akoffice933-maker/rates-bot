@@ -171,3 +171,72 @@ def test_web_no_history_store():
     with TestClient(create_app(service=service)) as c:
         assert c.get("/api/history").json() == {"hours": 24, "points": []}
         assert c.get("/chart.svg").status_code == 404
+
+
+# ---------- /history в боте ----------
+
+from app.history import history_text, period_label  # noqa: E402
+from app.keyboards import hist_kb, uu_kb  # noqa: E402
+
+
+def _hist_rows():
+    ts = int(NOW.timestamp())
+    day = 24 * 3600
+    old = {"ts": ts - day, "blue_sell": 1500.0, "mep_sell": 1500.0, "ccl_sell": 1560.0,
+           "usdt_ask": 1580.0, "usdt_bid": 1582.0, "usdtusd_ask": 1.0100, "usdtusd_bid": 1.0200}
+    new = {"ts": ts, "blue_sell": 1550.0, "mep_sell": 1536.0, "ccl_sell": 1596.0,
+           "usdt_ask": 1593.5, "usdt_bid": 1593.5, "usdtusd_ask": 1.0013, "usdtusd_bid": 1.0384}
+    return [old, new]
+
+
+def test_history_text_ru():
+    text = history_text(_hist_rows(), "ru", 24, now=NOW)
+    assert "📈 История — последние 24 ч" in text
+    assert "Blue продажа: 1 500,00 → 1 550,00 (↑+3,33 %)" in text
+    assert "Покупка USDT/USD: 1,0100 → 1,0013 (↓-0,86 %)" in text
+    assert "♻️ Арбитражный цикл USDT/USD: +0,99 % → +3,71 %" in text
+    assert "точек с" in text
+
+
+def test_history_text_es():
+    text = history_text(_hist_rows(), "es", 168, now=NOW)
+    assert "📈 Historial — últimos 7 días" in text
+    assert "Blue venta: 1.500,00 → 1.550,00 (↑+3,33 %)" in text
+
+
+def test_history_no_data():
+    assert "Historial" in history_text([], "es", 24) or history_text([], "es", 24)
+    assert len(history_text([{"ts": 1, "blue_sell": 1.0}], "ru", 24)) > 0  # NO_DATA текст
+
+
+def test_history_nearest_point():
+    """Точка ближе к границе периода берётся за базу (25ч vs 20ч при периоде 24ч)."""
+    ts = int(NOW.timestamp())
+    hour = 3600
+    rows = [
+        {"ts": ts - 25 * hour, "blue_sell": 1500.0, "usdtusd_ask": 1.01, "usdtusd_bid": 1.02},
+        {"ts": ts - 20 * hour, "blue_sell": 1520.0, "usdtusd_ask": 1.01, "usdtusd_bid": 1.02},
+        {"ts": ts, "blue_sell": 1550.0, "usdtusd_ask": 1.01, "usdtusd_bid": 1.02},
+    ]
+    text = history_text(rows, "ru", 24, now=NOW)
+    assert "1 500,00 → 1 550,00" in text
+    assert "1 520,00 →" not in text
+
+
+def test_period_labels():
+    assert period_label(24, "ru") == "24 ч"
+    assert period_label(168, "ru") == "7 дн"
+    assert period_label(720, "es") == "30 días"
+    assert period_label(24, "es") == "24 h"
+
+
+def test_hist_kb():
+    btns = [b.callback_data for row in hist_kb("ru", 168).inline_keyboard for b in row]
+    assert btns == ["hist:scr:24", "hist:scr:168", "hist:scr:720", "hist:rfsh:168", "menu:main"]
+    active = [b.text for row in hist_kb("ru", 168).inline_keyboard for b in row if b.text.startswith("✅")]
+    assert active == ["✅ 7 дн"]
+
+
+def test_uu_kb_has_history_button():
+    btns = [b.callback_data for row in uu_kb("ru").inline_keyboard for b in row]
+    assert "hist:scr:168" in btns

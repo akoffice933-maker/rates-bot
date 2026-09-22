@@ -157,7 +157,7 @@ def test_menu_has_usdtusd_button():
 
 def test_uu_kb_callbacks():
     buttons = [b for row in uu_kb("ru").inline_keyboard for b in row]
-    assert [b.callback_data for b in buttons] == ["uu:rfsh", "scr:links", "menu:main"]
+    assert [b.callback_data for b in buttons] == ["uu:rfsh", "hist:scr:168", "scr:links", "menu:main"]
 
 
 # ---------- арбитражный цикл ----------

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import math
+import time
 
 from aiogram import F, Router
 from aiogram.exceptions import TelegramBadRequest
@@ -33,16 +34,18 @@ from .keyboards import (
     cmp_kb,
     rg_kb,
     rg_screen_kb,
+    hist_kb,
 )
 from .service import RatesService
 from .digest import DIGEST_HOURS
 from .p2p import BinanceP2PService
 from .guide import SCENARIOS, guide_menu_text, guide_text
+from .history import PERIODS as HIST_PERIODS, history_text
 from .bestchange import BestChangeService
 from .ratesguru import RatesGuruService
 from .sources.ratesguru import DIRECTIONS as RG_DIRECTIONS
 from .sources.bestchange import DIRECTIONS
-from .storage import Alert, BotStorage
+from .storage import Alert, BotStorage, RateHistoryStore
 
 router = Router()
 
@@ -204,6 +207,50 @@ async def cb_cmp_scr(cb: CallbackQuery, service: RatesService, bestchange: BestC
 async def cb_cmp_rfsh(cb: CallbackQuery, service: RatesService, bestchange: BestChangeService,
                       p2p: BinanceP2PService, storage: BotStorage) -> None:
     await _compare_screen(cb.message, service, bestchange, p2p, storage, force=True)
+    await cb.answer("✅")
+
+
+def _hist_rows(history: RateHistoryStore, hours: int) -> list[dict]:
+    """Точки за период (+12ч запас на поиск ближайшей к границе точки)."""
+    return history.get_history(int(time.time()) - (hours + 12) * 3600)
+
+
+@router.message(Command("history", "hist"))
+async def cmd_history(message: Message, history: RateHistoryStore, storage: BotStorage) -> None:
+    lang = storage.get_lang(message.chat.id, config.DEFAULT_LANG)
+    text = history_text(_hist_rows(history, 24), lang, 24)
+    await message.answer(text, reply_markup=hist_kb(lang, 24))
+
+
+@router.callback_query(F.data.startswith("hist:scr:"))
+async def cb_hist_scr(cb: CallbackQuery, history: RateHistoryStore, storage: BotStorage) -> None:
+    try:
+        hours = int(cb.data.rsplit(":", 1)[1])
+    except ValueError:
+        await cb.answer()
+        return
+    if hours not in HIST_PERIODS:
+        await cb.answer()
+        return
+    lang = storage.get_lang(cb.message.chat.id, config.DEFAULT_LANG)
+    text = history_text(_hist_rows(history, hours), lang, hours)
+    await _edit(cb, text, hist_kb(lang, hours))
+    await cb.answer()
+
+
+@router.callback_query(F.data.startswith("hist:rfsh:"))
+async def cb_hist_rfsh(cb: CallbackQuery, history: RateHistoryStore, storage: BotStorage) -> None:
+    try:
+        hours = int(cb.data.rsplit(":", 1)[1])
+    except ValueError:
+        await cb.answer()
+        return
+    if hours not in HIST_PERIODS:
+        await cb.answer()
+        return
+    lang = storage.get_lang(cb.message.chat.id, config.DEFAULT_LANG)
+    text = history_text(_hist_rows(history, hours), lang, hours)
+    await _edit(cb, text, hist_kb(lang, hours))
     await cb.answer("✅")
 
 
