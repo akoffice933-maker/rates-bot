@@ -28,27 +28,38 @@ from .service import RatesService
 from .storage import BotStorage, RateHistoryStore
 
 
+BOT_COMMANDS: dict[str, dict[str, str]] = {
+    "start":     {"es": "Menú principal",                          "ru": "Главное меню"},
+    "rates":     {"es": "Cotizaciones del dólar",                  "ru": "Котировки доллара"},
+    "usdt":      {"es": "Mejores precios USDT/ARS",                "ru": "Лучшие цены USDT/ARS"},
+    "usdtusd":   {"es": "USDT ⇄ USD (efectivo/sin efectivo)",      "ru": "USDT ⇄ USD (нал/безнал)"},
+    "compare":   {"es": "Comparar fuentes USDT/ARS",               "ru": "Сравнить источники USDT/ARS"},
+    "p2p":       {"es": "Binance P2P en vivo",                     "ru": "Binance P2P вживую"},
+    "spread":    {"es": "Brecha USDT vs Blue",                     "ru": "Спред USDT к Blue"},
+    "alert":     {"es": "Alertas de brecha y cotización",          "ru": "Алерты: спред и курсы"},
+    "digest":    {"es": "Resumen diario",                          "ru": "Ежедневный дайджест"},
+    "how":       {"es": "Cómo cambiar / как обменять",             "ru": "Как обменять / cómo cambiar"},
+    "bestchange": {"es": "Intercambiadores BestChange",            "ru": "Обменники BestChange"},
+    "ratesguru": {"es": "Intercambiadores RatesGuru (RUB/USDT)",   "ru": "Обменники RatesGuru (RUB/USDT)"},
+    "history":   {"es": "Dinámica 24h/7d/30d",                     "ru": "Динамика 24ч/7д/30д"},
+    "calc":      {"es": "Calculadora de cambio",                   "ru": "Калькулятор обмена"},
+    "lang":      {"es": "Idioma / язык",                           "ru": "Язык / idioma"},
+    "help":      {"es": "Ayuda",                                   "ru": "Справка"},
+}
+
+
+def build_bot_commands(lang: str) -> list[BotCommand]:
+    return [BotCommand(command=c, description=spec[lang]) for c, spec in BOT_COMMANDS.items()]
+
+
 async def set_bot_commands(bot: Bot) -> None:
-    await bot.set_my_commands(
-        [
-            BotCommand(command="start", description="Menú principal"),
-            BotCommand(command="rates", description="Cotizaciones del dólar"),
-            BotCommand(command="usdt", description="Mejores precios USDT/ARS"),
-            BotCommand(command="usdtusd", description="USDT ⇄ USD (efectivo/sin efectivo)"),
-            BotCommand(command="compare", description="Comparar fuentes USDT/ARS"),
-            BotCommand(command="p2p", description="Binance P2P en vivo"),
-            BotCommand(command="spread", description="Brecha USDT vs Blue"),
-            BotCommand(command="alert", description="Alertas de brecha y cotización"),
-            BotCommand(command="digest", description="Digesta diaria"),
-            BotCommand(command="how", description="Cómo cambiar / как обменять"),
-            BotCommand(command="bestchange", description="Intercambiadores BestChange"),
-            BotCommand(command="ratesguru", description="Intercambiadores RatesGuru (RUB/USDT)"),
-            BotCommand(command="history", description="Dinámica 24h/7d/30d"),
-            BotCommand(command="calc", description="Calculadora de cambio"),
-            BotCommand(command="lang", description="Idioma / язык"),
-            BotCommand(command="help", description="Ayuda"),
-        ]
-    )
+    """Локализованное меню команд: русский — по умолчанию, испанский — для es-клиентов.
+
+    Telegram показывает список под язык клиента (language_code="es"),
+    остальным — дефолтный (ru).
+    """
+    await bot.set_my_commands(build_bot_commands("ru"))
+    await bot.set_my_commands(build_bot_commands("es"), language_code="es")
 
 
 async def run() -> None:
