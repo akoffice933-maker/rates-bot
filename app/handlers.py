@@ -35,12 +35,15 @@ from .keyboards import (
     rg_kb,
     rg_screen_kb,
     hist_kb,
+    calc_modes_kb,
+    calc_result_kb,
 )
 from .service import RatesService
 from .digest import DIGEST_HOURS
 from .p2p import BinanceP2PService
 from .guide import SCENARIOS, guide_menu_text, guide_text
 from .history import PERIODS as HIST_PERIODS, history_text
+from .calc import MODES as CALC_MODES, calc_text, parse_amount
 from .bestchange import BestChangeService
 from .ratesguru import RatesGuruService
 from .sources.ratesguru import DIRECTIONS as RG_DIRECTIONS
@@ -61,6 +64,12 @@ class AlertCustom(StatesGroup):
     """FSM: ждём от пользователя порог/значение (после выбора метрики)."""
 
     waiting_threshold = State()
+
+
+class CalcInput(StatesGroup):
+    """FSM: ждём сумму для калькулятора обмена."""
+
+    waiting_amount = State()
 
 
 # ---------- вспомогательные ----------
@@ -208,6 +217,69 @@ async def cb_cmp_rfsh(cb: CallbackQuery, service: RatesService, bestchange: Best
                       p2p: BinanceP2PService, storage: BotStorage) -> None:
     await _compare_screen(cb.message, service, bestchange, p2p, storage, force=True)
     await cb.answer("✅")
+
+
+# ---------- калькулятор обмена ----------
+
+_CALC_PROMPTS = {
+    "buy_ars": "CALC_PROMPT_ARS",
+    "sell_ars": "CALC_PROMPT_USDT",
+    "buy_usd": "CALC_PROMPT_USD",
+    "sell_usd": "CALC_PROMPT_USDT",
+    "arb": "CALC_PROMPT_USDT",
+}
+
+
+@router.message(Command("calc"))
+async def cmd_calc(message: Message, storage: BotStorage) -> None:
+    lang = storage.get_lang(message.chat.id, config.DEFAULT_LANG)
+    await message.answer(f"<b>{t(lang, 'CALC_MODES_TITLE')}</b>", reply_markup=calc_modes_kb(lang))
+
+
+@router.callback_query(F.data == "calc:menu")
+async def cb_calc_menu(cb: CallbackQuery, state: FSMContext, storage: BotStorage) -> None:
+    await state.clear()
+    lang = storage.get_lang(cb.message.chat.id, config.DEFAULT_LANG)
+    await _edit(cb, f"<b>{t(lang, 'CALC_MODES_TITLE')}</b>", calc_modes_kb(lang))
+    await cb.answer()
+
+
+@router.callback_query(F.data.startswith("calc:mode:"))
+async def cb_calc_mode(cb: CallbackQuery, state: FSMContext, storage: BotStorage) -> None:
+    mode = cb.data.rsplit(":", 1)[1]
+    if mode not in CALC_MODES:
+        await cb.answer()
+        return
+    lang = storage.get_lang(cb.message.chat.id, config.DEFAULT_LANG)
+    await state.set_state(CalcInput.waiting_amount)
+    await state.update_data(mode=mode)
+    await cb.message.answer(t(lang, _CALC_PROMPTS[mode]))
+    await cb.answer()
+
+
+@router.message(StateFilter(CalcInput.waiting_amount), F.text, ~F.text.startswith("/"))
+async def calc_amount_input(message: Message, state: FSMContext,
+                            service: RatesService, storage: BotStorage) -> None:
+    lang = storage.get_lang(message.chat.id, config.DEFAULT_LANG)
+    data = await state.get_data()
+    mode = data.get("mode")
+    if mode not in CALC_MODES:
+        await state.clear()
+        return
+    amount = parse_amount(message.text)
+    if amount is None:
+        await message.answer(t(lang, "CALC_BAD"))
+        return
+    if mode == "sell_ars":
+        # сумма в USDT — берём рынок именно для этого объёма
+        snap = await service.get_snapshot(volume=max(1, round(amount)))
+    elif mode == "buy_ars":
+        snap = await service.get_snapshot()
+    else:
+        snap = await service.get_snapshot_full()
+    text = calc_text(mode, amount, snap, lang)
+    await state.clear()
+    await message.answer(text or t(lang, "NO_DATA"), reply_markup=calc_result_kb(lang, mode))
 
 
 def _hist_rows(history: RateHistoryStore, hours: int) -> list[dict]:

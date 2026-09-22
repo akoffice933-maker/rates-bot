@@ -19,6 +19,7 @@ STRINGS: dict[str, dict[str, str]] = {
             "/compare — USDT/ARS en todas las fuentes\n"
             "/ratesguru — intercambiadores RUB/USDT (segundo monitor)\n"
             "/history — dinámica 24 h / 7 días / 30 días\n"
+            "/calc — calculadora de cambio y arbitraje\n"
             "/spread — brecha USDT vs Blue\n"
             "/alert — alertas de brecha y de cotización\n"
             "/p2p — anuncios en vivo de Binance P2P\n"
@@ -100,6 +101,28 @@ STRINGS: dict[str, dict[str, str]] = {
         "M_USDTUSD_CASH_BUY": "Compra USDT por USD (efectivo)",
         "ALERT_CUSTOM_PROMPT_USD": "Escribí el valor en USD por 1 USDT (por ejemplo 1,03):",
         "ALERT_CUSTOM_BAD_USD": "⛔️ No entendí el número. Ejemplo: 1,03 (entre 0,8 y 1,5).",
+        "CALC_MODES_TITLE": "🧮 Calculadora de cambio — elegí la dirección:",
+        "CALC_MODE_BUY_ARS": "Comprar USDT por ARS",
+        "CALC_MODE_SELL_ARS": "Vender USDT por ARS",
+        "CALC_MODE_BUY_USD": "Comprar USDT por USD",
+        "CALC_MODE_SELL_USD": "Vender USDT por USD",
+        "CALC_MODE_ARB": "♻️ Ciclo de arbitraje",
+        "CALC_PROMPT_ARS": "Escribí la suma en ARS (por ejemplo 150000):",
+        "CALC_PROMPT_USDT": "Escribí la suma en USDT (por ejemplo 500):",
+        "CALC_PROMPT_USD": "Escribí la suma en USD (por ejemplo 1000):",
+        "CALC_BAD": "⛔️ No entendí el número. Ejemplo: 1500 o 1500,50",
+        "CALC_TITLE_BUY_ARS": "🧮 Comprar USDT por {amount} ARS",
+        "CALC_TITLE_SELL_ARS": "🧮 Vender {amount} USDT → ARS",
+        "CALC_TITLE_BUY_USD": "🧮 Comprar USDT por {amount} USD",
+        "CALC_TITLE_SELL_USD": "🧮 Vender {amount} USDT → USD",
+        "CALC_TITLE_ARB": "♻️ Ciclo de arbitraje con {amount} USDT",
+        "CALC_BEST_LINE": "Mejor: {venue} a {price} → <b>{result}</b>",
+        "CALC_VS_MEDIAN": "Por la mediana ({median}): {result} · diferencia {diff}",
+        "CALC_VOLUME_NOTE": "⚠️ Precio para volumen ~100 USDT; para sumas grandes verificá en la plataforma",
+        "CALC_ARB_STEPS": "1) vender: {sell_venue} a {sell_price} → {usd} USD\n2) recomprar: {buy_venue} a {buy_price} → {usdt} USDT",
+        "CALC_ARB_GROSS": "Bruto: {profit} USDT ({pct})",
+        "CALC_ARB_FEES": "Menos comisiones: ~1 USDT (transferencia TRC20) + retiro de USD según tu canal",
+        "CALC_ANOTHER": "🔁 Otra suma",
         "HIST_TITLE": "📈 Historial — últimos {period}",
         "HIST_HOURS": "{n} h",
         "HIST_DAYS": "{n} días",
@@ -274,6 +297,7 @@ STRINGS: dict[str, dict[str, str]] = {
             "/compare — USDT/ARS по всем источникам\n"
             "/ratesguru — обменники RUB/USDT (второй монитор)\n"
             "/history — динамика 24 ч / 7 дн / 30 дн\n"
+            "/calc — калькулятор обмена и арбитража\n"
             "/spread — спред USDT vs Blue\n"
             "/alert — алерты спреда и курсов\n"
             "/p2p — живые объявления Binance P2P\n"
@@ -355,6 +379,28 @@ STRINGS: dict[str, dict[str, str]] = {
         "M_USDTUSD_CASH_BUY": "Покупка USDT за USD (нал)",
         "ALERT_CUSTOM_PROMPT_USD": "Введи значение в USD за 1 USDT (например 1,03):",
         "ALERT_CUSTOM_BAD_USD": "⛔️ Не понял число. Пример: 1,03 (от 0,8 до 1,5).",
+        "CALC_MODES_TITLE": "🧮 Калькулятор обмена — выберите направление:",
+        "CALC_MODE_BUY_ARS": "Купить USDT за ARS",
+        "CALC_MODE_SELL_ARS": "Продать USDT за ARS",
+        "CALC_MODE_BUY_USD": "Купить USDT за USD",
+        "CALC_MODE_SELL_USD": "Продать USDT за USD",
+        "CALC_MODE_ARB": "♻️ Арбитражный цикл",
+        "CALC_PROMPT_ARS": "Введи сумму в ARS (например 150000):",
+        "CALC_PROMPT_USDT": "Введи сумму в USDT (например 500):",
+        "CALC_PROMPT_USD": "Введи сумму в USD (например 1000):",
+        "CALC_BAD": "⛔️ Не понял число. Пример: 1500 или 1500,50",
+        "CALC_TITLE_BUY_ARS": "🧮 Купить USDT за {amount} ARS",
+        "CALC_TITLE_SELL_ARS": "🧮 Продать {amount} USDT → ARS",
+        "CALC_TITLE_BUY_USD": "🧮 Купить USDT за {amount} USD",
+        "CALC_TITLE_SELL_USD": "🧮 Продать {amount} USDT → USD",
+        "CALC_TITLE_ARB": "♻️ Арбитражный цикл с {amount} USDT",
+        "CALC_BEST_LINE": "Лучшая: {venue} по {price} → <b>{result}</b>",
+        "CALC_VS_MEDIAN": "По медиане ({median}): {result} · разница {diff}",
+        "CALC_VOLUME_NOTE": "⚠️ курс для объёма ~100 USDT; на крупных суммах уточняйте на площадке",
+        "CALC_ARB_STEPS": "1) продать: {sell_venue} по {sell_price} → {usd} USD\n2) купить обратно: {buy_venue} по {buy_price} → {usdt} USDT",
+        "CALC_ARB_GROSS": "Брутто: {profit} USDT ({pct})",
+        "CALC_ARB_FEES": "Минус комиссии: ~1 USDT (перевод TRC20) + вывод USD по вашему каналу",
+        "CALC_ANOTHER": "🔁 Другая сумма",
         "HIST_TITLE": "📈 История — последние {period}",
         "HIST_HOURS": "{n} ч",
         "HIST_DAYS": "{n} дн",

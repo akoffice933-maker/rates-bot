@@ -12,6 +12,7 @@ from .storage import Alert
 from .sources.bestchange import DIRECTIONS, DIRECTIONS_ORDER
 from .sources.ratesguru import DIRECTIONS as RG_DIRECTIONS, DIRECTIONS_ORDER as RG_ORDER
 from .history import PERIODS, period_label
+from .calc import MODES, MODE_LABEL_KEY
 from .venue_links import SOURCE_URLS, USD_URLS
 
 # action -> (метка при direct, метка при inverse)
@@ -42,7 +43,10 @@ def main_menu(lang: str) -> InlineKeyboardMarkup:
                 InlineKeyboardButton(text=t(lang, "BTN_ALERT"), callback_data="al:menu"),
                 InlineKeyboardButton(text=t(lang, "BTN_LANG"), callback_data="scr:lang"),
             ],
-            [InlineKeyboardButton(text=t(lang, "GUIDE_BTN"), callback_data="gw:menu")],
+            [
+                InlineKeyboardButton(text=t(lang, "GUIDE_BTN"), callback_data="gw:menu"),
+                InlineKeyboardButton(text="🧮", callback_data="calc:menu"),
+            ],
         ]
     )
 
@@ -103,6 +107,24 @@ def uu_kb(lang: str) -> InlineKeyboardMarkup:
             [InlineKeyboardButton(text=t(lang, "BTN_REFRESH"), callback_data="uu:rfsh")],
             [InlineKeyboardButton(text=t(lang, "BTN_HISTORY"), callback_data="hist:scr:168")],
             [InlineKeyboardButton(text=t(lang, "BTN_LINKS"), callback_data="scr:links")],
+            [InlineKeyboardButton(text=t(lang, "BTN_BACK"), callback_data="menu:main")],
+        ]
+    )
+
+
+def calc_modes_kb(lang: str) -> InlineKeyboardMarkup:
+    rows = [
+        [InlineKeyboardButton(text=t(lang, MODE_LABEL_KEY[m]), callback_data=f"calc:mode:{m}")]
+        for m in MODES
+    ]
+    rows.append([InlineKeyboardButton(text=t(lang, "BTN_BACK"), callback_data="menu:main")])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def calc_result_kb(lang: str, mode: str) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text=t(lang, "CALC_ANOTHER"), callback_data=f"calc:mode:{mode}")],
             [InlineKeyboardButton(text=t(lang, "BTN_BACK"), callback_data="menu:main")],
         ]
     )

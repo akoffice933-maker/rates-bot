@@ -44,6 +44,7 @@ async def set_bot_commands(bot: Bot) -> None:
             BotCommand(command="bestchange", description="Intercambiadores BestChange"),
             BotCommand(command="ratesguru", description="Intercambiadores RatesGuru (RUB/USDT)"),
             BotCommand(command="history", description="Dinámica 24h/7d/30d"),
+            BotCommand(command="calc", description="Calculadora de cambio"),
             BotCommand(command="lang", description="Idioma / язык"),
             BotCommand(command="help", description="Ayuda"),
         ]
