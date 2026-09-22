@@ -19,6 +19,8 @@ def money(x: float | None, lang: str, decimals: int = 2) -> str:
     s = f"{x:,.{decimals}f}"  # 1,503.50
     if lang == "es":
         return s.replace(",", "#").replace(".", ",").replace("#", ".")
+    if lang == "en":
+        return s
     return s.replace(",", " ").replace(".", ",")
 
 
@@ -65,6 +67,8 @@ def ago(dt: datetime, lang: str, now: datetime | None = None) -> str:
         if lang == "ru":
             word = plural_ru(minutes, "минуту", "минуты", "минут")
             return f"{minutes} {word} назад"
+        if lang == "en":
+            return f"{minutes} min ago"
         return f"hace {minutes} min"
     hours, mins = divmod(minutes, 60)
     if lang == "ru":
@@ -73,4 +77,6 @@ def ago(dt: datetime, lang: str, now: datetime | None = None) -> str:
         if mins:
             core += f" {mins} мин"
         return core + " назад"
+    if lang == "en":
+        return f"{hours} h {mins} min ago" if mins else f"{hours} h ago"
     return f"hace {hours} h {mins} min" if mins else f"hace {hours} h"

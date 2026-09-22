@@ -106,4 +106,5 @@ def test_index_html_ru():
 
 def test_index_lang_validation():
     with make_client() as c:
-        assert c.get("/", params={"lang": "en"}).status_code == 422
+        assert c.get("/", params={"lang": "en"}).status_code == 200   # en-локаль веба
+        assert c.get("/", params={"lang": "pt"}).status_code == 422

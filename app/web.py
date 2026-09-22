@@ -23,6 +23,9 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import Response
 
 from . import config, formatting as fmt
+from . import render
+from .bestchange import BestChangeService
+from .p2p import BinanceP2PService
 from .service import RatesService
 from .storage import RateHistoryStore
 
@@ -299,7 +302,8 @@ def index_html(snap, lang: str, history_rows: list[dict] | None = None) -> str:
 
   <footer>
     {esc(t(lang, 'WEB_API_NOTE'))}: <a href="/api/rates">/api/rates</a> ·
-    <a href="/api/usdt">/api/usdt</a> · <a href="/docs">/docs</a> (OpenAPI)<br>
+    <a href="/api/usdt">/api/usdt</a> · <a href="/compare">/compare</a> ·
+    <a href="/docs">/docs</a> (OpenAPI)<br>
     {esc(t(lang, 'WEB_CREDIT'))}
   </footer>
 </div>
@@ -307,10 +311,66 @@ def index_html(snap, lang: str, history_rows: list[dict] | None = None) -> str:
 </html>"""
 
 
-def create_app(service: RatesService | None = None, history=None) -> FastAPI:
+def compare_page_html(body: str, lang: str) -> str:
+    """Оболочка страницы /compare (тело — тот же рендер, что в боте)."""
+    return f"""<!DOCTYPE html>
+<html lang="{lang}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>{_PAGE_CSS}</style>
+</head>
+<body>
+<div class="wrap">
+{body}
+<p style="margin-top:22px"><a href="/">← rates</a> · <a href="/api/compare">/api/compare</a></p>
+</div>
+</body>
+</html>"""
+
+
+def compare_payload(snap, bc_sell, bc_buy, p2p) -> dict:
+    """JSON-структура сравнения источников USDT/ARS (лучшая продажа/покупка)."""
+
+    def entry(source: str, venue: str | None, price: float | None) -> dict:
+        return {"source": source, "venue": venue, "price": price}
+
+    sell: list[dict] = []
+    buy: list[dict] = []
+    if snap.usdt and snap.usdt.bids:
+        q = snap.usdt.bids[0]
+        sell.append(entry("criptoya", q.name, q.bid))
+    if snap.usdt and snap.usdt.asks:
+        q = snap.usdt.asks[0]
+        buy.append(entry("criptoya", q.name, q.ask))
+    if bc_sell is not None and bc_sell.ok and bc_sell.rows:
+        row = render._bc_best_row(bc_sell.rows, "sell")
+        sell.append(entry("bestchange", row.name, row.receive))
+    if bc_buy is not None and bc_buy.ok and bc_buy.rows:
+        row = render._bc_best_row(bc_buy.rows, "buy")
+        buy.append(entry("bestchange", row.name, row.give))
+    p2p_ok = p2p is not None and p2p.ok
+    sell.append(entry("binance_p2p",
+                      p2p.buy_ads[0].advertiser if p2p_ok and p2p.buy_ads else None,
+                      p2p.buy_ads[0].price if p2p_ok and p2p.buy_ads else None))
+    buy.append(entry("binance_p2p",
+                     p2p.sell_ads[0].advertiser if p2p_ok and p2p.sell_ads else None,
+                     p2p.sell_ads[0].price if p2p_ok and p2p.sell_ads else None))
+    return {
+        "fetched_at": snap.fetched_at.isoformat(),
+        "sell": sell,
+        "buy": buy,
+        "best_sell": max((e["price"] for e in sell if e["price"] is not None), default=None),
+        "best_buy": min((e["price"] for e in buy if e["price"] is not None), default=None),
+    }
+
+
+def create_app(service: RatesService | None = None, history=None,
+               bestchange=None, p2p=None) -> FastAPI:
     """Фабрика приложения. service=None → создаётся свой (live-данные, lifespan).
 
-    history — RateHistoryStore (или None в тестах без истории).
+    history/bestchange/p2p — можно передать свои (тесты) или None
+    (live-режим создаст в lifespan; без lifespan — эндпоинты их не используют).
     """
 
     @asynccontextmanager
@@ -320,8 +380,11 @@ def create_app(service: RatesService | None = None, history=None) -> FastAPI:
         from .http_client import AiohttpClient
 
         session = aiohttp.ClientSession()
-        app.state.service = service or RatesService(AiohttpClient(session, timeout=15))
+        client = AiohttpClient(session, timeout=15)
+        app.state.service = service or RatesService(client)
         app.state.history = history or RateHistoryStore(config.HISTORY_DB_PATH)
+        app.state.bestchange = bestchange or BestChangeService(client)
+        app.state.p2p = p2p or BinanceP2PService(client)
         yield
         await session.close()
 
@@ -331,8 +394,9 @@ def create_app(service: RatesService | None = None, history=None) -> FastAPI:
         version="1.1.0",
         lifespan=lifespan if service is None else None,
     )
-    if history is not None:
-        app.state.history = history
+    for name, dep in (("history", history), ("bestchange", bestchange), ("p2p", p2p)):
+        if dep is not None:
+            setattr(app.state, name, dep)
 
     def _record(snap) -> None:
         """Записать точку истории (не чаще HISTORY_INTERVAL_SECONDS)."""
@@ -353,7 +417,7 @@ def create_app(service: RatesService | None = None, history=None) -> FastAPI:
         return store.get_history(int(time.time()) - hours * 3600)
 
     @app.get("/", summary="Página principal: tabla de cotizaciones")
-    async def index(lang: str = Query("es", pattern="^(es|ru)$")):
+    async def index(lang: str = Query("es", pattern="^(es|ru|en)$")):
         snap = await _service_of(app, service).get_snapshot_full()
         _record(snap)
         return _html(index_html(snap, lang, history_rows=_history_rows(168)))
@@ -377,11 +441,53 @@ def create_app(service: RatesService | None = None, history=None) -> FastAPI:
     async def api_history(hours: int = Query(24, ge=1, le=2160)):
         return {"hours": hours, "points": _history_rows(hours)}
 
+    @app.get("/api/history.csv", summary="Historial en CSV (descarga)")
+    async def api_history_csv(hours: int = Query(24, ge=1, le=2160)):
+        import csv
+        import io
+        from datetime import datetime, timezone as tz_utc
+
+        cols = list(RateHistoryStore._COLS)
+        buf = io.StringIO()
+        writer = csv.writer(buf)
+        writer.writerow(["ts_utc"] + cols)
+        for r in _history_rows(hours):
+            ts_iso = datetime.fromtimestamp(r["ts"], tz=tz_utc.utc).isoformat()
+            writer.writerow([ts_iso] + [r[c] for c in cols])
+        return Response(
+            content=buf.getvalue(),
+            media_type="text/csv; charset=utf-8",
+            headers={"Content-Disposition": "attachment; filename=history.csv"},
+        )
+
+    @app.get("/compare", summary="Comparación de fuentes USDT/ARS")
+    async def compare_page(lang: str = Query("es", pattern="^(es|ru|en)$")):
+        snap = await _service_of(app, service).get_snapshot()
+        bc = getattr(app.state, "bestchange", None)
+        p2p_dep = getattr(app.state, "p2p", None)
+        bc_sell = await bc.get("usdt_mp") if bc else None
+        bc_buy = await bc.get("mp_usdt") if bc else None
+        p2p_res = await p2p_dep.get() if p2p_dep else None
+        body = render.compare_text(snap, bc_sell, bc_buy, p2p_res, lang)
+        if body is None:
+            raise HTTPException(status_code=503, detail="no data sources available")
+        return _html(compare_page_html(body, lang))
+
+    @app.get("/api/compare", summary="Comparación en JSON: CriptoYa/BestChange/Binance P2P")
+    async def api_compare():
+        snap = await _service_of(app, service).get_snapshot()
+        bc = getattr(app.state, "bestchange", None)
+        p2p_dep = getattr(app.state, "p2p", None)
+        bc_sell = await bc.get("usdt_mp") if bc else None
+        bc_buy = await bc.get("mp_usdt") if bc else None
+        p2p_res = await p2p_dep.get() if p2p_dep else None
+        return compare_payload(snap, bc_sell, bc_buy, p2p_res)
+
     @app.get("/chart.svg", summary="Gráfico SVG del historial")
     async def chart_svg(
         hours: int = Query(24, ge=1, le=2160),
         metric: str = Query("usdt", pattern="^(usdt|blue|usdtusd)$"),
-        lang: str = Query("es", pattern="^(es|ru)$"),
+        lang: str = Query("es", pattern="^(es|ru|en)$"),
     ):
         svg = history_chart_svg(_history_rows(hours), metric, lang)
         if svg is None:

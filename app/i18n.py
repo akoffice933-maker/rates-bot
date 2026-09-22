@@ -561,6 +561,56 @@ STRINGS: dict[str, dict[str, str]] = {
         "BC_FOOTER": "Нажмите на название обменника, чтобы перейти к обмену · Курс и лимиты могут меняться",
         "BC_CREDIT": "Данные: BestChange",
     },
+    "en": {
+        "JUST_NOW": "just now",
+        "UPDATED": "Updated",
+        "PARTIAL": "Some sources unavailable",
+        "STALE_BANNER": "⚠️ Data may be outdated",
+        "ROW_OFICIAL": "Oficial",
+        "ROW_BLUE": "Blue",
+        "ROW_MEP": "MEP (stock)",
+        "ROW_CCL": "CCL",
+        "ROW_TARJETA": "Card",
+        "COMPARE_TITLE": "⚖️ USDT/ARS — source comparison",
+        "CMP_SELL_HDR": "📤 Sell USDT → receive ARS (best first):",
+        "CMP_BUY_HDR": "📥 Buy USDT with ARS (best first):",
+        "CMP_UNAVAILABLE": "unavailable right now",
+        "CMP_VS_BEST": "({pct} vs best)",
+        "CMP_NOTE": (
+            "BestChange — Mercado Pago ARS (limits & reserves in /bestchange) · "
+            "CriptoYa — prices with fees · Binance P2P — ads"
+        ),
+        "CRIPTOYA_CREDIT": "Data: CriptoYa",
+        "BC_CREDIT": "Data: BestChange",
+        "WEB_TITLE": "💵 Exchange rates in Argentina",
+        "WEB_SUB": "USD (oficial, blue, MEP, CCL, tarjeta) and USDT/ARS — real-time data",
+        "WEB_USD_TABLE": "USD/ARS",
+        "WEB_BUY": "Buy",
+        "WEB_SELL": "Sell",
+        "WEB_BEST_BUY": "Buy USDT (best)",
+        "WEB_BEST_SELL": "Sell USDT (best)",
+        "WEB_MEDIAN_ASK": "USDT — buy median",
+        "WEB_MEDIAN_BID": "USDT — sell median",
+        "WEB_SPREAD": "USDT vs Blue spread",
+        "WEB_PARTIAL": "Some sources unavailable",
+        "WEB_VENUE": "Venue",
+        "WEB_PRICE": "Price",
+        "WEB_API_NOTE": "API",
+        "WEB_CREDIT": (
+            "Data: Bluelytics, DolarAPI and CriptoYa (aggregator of dozens of platforms). "
+            "Methodology: ±10% median outlier filter, spreads by medians. "
+            "Informational only, not financial advice."
+        ),
+        "WEB_CH_ARS_TITLE": "📈 Blue & USDT/ARS — last 7 days",
+        "WEB_CH_UU_TITLE": "♻️ USDT/USD — arbitrage corridor (7 days)",
+        "WEB_CH_BLUE": "Blue sell",
+        "WEB_CH_OFICIAL": "Oficial",
+        "WEB_CH_MEP": "MEP",
+        "WEB_CH_USDT_ASK": "Buy USDT",
+        "WEB_CH_USDT_BID": "Sell USDT",
+        "WEB_CH_UU_ASK": "USDT/USD buy",
+        "WEB_CH_UU_BID": "USDT/USD sell",
+    },
 }
 
 
