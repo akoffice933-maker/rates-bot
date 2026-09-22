@@ -10,6 +10,7 @@ from .digest import DIGEST_HOURS
 from .i18n import t
 from .storage import Alert
 from .sources.bestchange import DIRECTIONS, DIRECTIONS_ORDER
+from .sources.ratesguru import DIRECTIONS as RG_DIRECTIONS, DIRECTIONS_ORDER as RG_ORDER
 from .venue_links import SOURCE_URLS, USD_URLS
 
 # action -> (метка при direct, метка при inverse)
@@ -226,7 +227,7 @@ def links_kb(lang: str) -> InlineKeyboardMarkup:
             [src_btn("📊 Bluelytics", "bluelytics"), src_btn("⚙️ DolarAPI", "dolarapi")],
             [src_btn("📰 Ámbito", "ambito"), src_btn("🏦 Banco Nación", "bna")],
             [src_btn("💰 CriptoYa", "criptoya")],
-            [src_btn("💱 BestChange", "bestchange")],
+            [src_btn("💱 BestChange", "bestchange"), src_btn("📊 RatesGuru", "ratesguru")],
             # Где купить / продать USD
             [usd_btn("📈 InvertirOnline", "iol"), usd_btn("📈 Balanz", "balanz")],
             [usd_btn("📈 Bull Market", "bullmarket"), usd_btn("💳 Personal Pay", "personalpay")],
@@ -274,8 +275,31 @@ def bc_kb(lang: str) -> InlineKeyboardMarkup:
                               callback_data=f"bc:dir:{k}")]
         for k in DIRECTIONS_ORDER
     ]
+    rows.append([InlineKeyboardButton(text="📊 RatesGuru", callback_data="rg:menu")])
     rows.append([InlineKeyboardButton(text=t(lang, "BTN_BACK"), callback_data="menu:main")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def rg_kb(lang: str) -> InlineKeyboardMarkup:
+    """Выбор направления RatesGuru (+ переход на BestChange)."""
+    rows = [
+        [InlineKeyboardButton(text=RG_DIRECTIONS[k].name_ru if lang == "ru" else RG_DIRECTIONS[k].name_es,
+                              callback_data=f"rg:dir:{k}")]
+        for k in RG_ORDER
+    ]
+    rows.append([InlineKeyboardButton(text="💱 BestChange", callback_data="bc:menu")])
+    rows.append([InlineKeyboardButton(text=t(lang, "BTN_BACK"), callback_data="menu:main")])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def rg_screen_kb(lang: str, key: str) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text=t(lang, "BTN_REFRESH"), callback_data=f"rg:rfsh:{key}")],
+            [InlineKeyboardButton(text="📊 RatesGuru", callback_data="rg:menu")],
+            [InlineKeyboardButton(text=t(lang, "BTN_BACK"), callback_data="menu:main")],
+        ]
+    )
 
 
 def bc_screen_kb(lang: str, key: str) -> InlineKeyboardMarkup:

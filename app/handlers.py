@@ -31,12 +31,16 @@ from .keyboards import (
     screen_kb,
     uu_kb,
     cmp_kb,
+    rg_kb,
+    rg_screen_kb,
 )
 from .service import RatesService
 from .digest import DIGEST_HOURS
 from .p2p import BinanceP2PService
 from .guide import SCENARIOS, guide_menu_text, guide_text
 from .bestchange import BestChangeService
+from .ratesguru import RatesGuruService
+from .sources.ratesguru import DIRECTIONS as RG_DIRECTIONS
 from .sources.bestchange import DIRECTIONS
 from .storage import Alert, BotStorage
 
@@ -704,6 +708,44 @@ async def cb_guide_scenario(cb: CallbackQuery, service: RatesService, storage: B
         text = t(lang, "NO_DATA")
     await _edit(cb, text, scenario_kb(lang))
     await cb.answer()
+
+
+# ---------- BestChange (обменники) ----------
+
+# ---------- RatesGuru (второй монитор RUB/USDT) ----------
+
+@router.message(Command("ratesguru", "rg"))
+async def cmd_ratesguru(message: Message, storage: BotStorage) -> None:
+    lang = storage.get_lang(message.chat.id, config.DEFAULT_LANG)
+    await message.answer(f"<b>{t(lang, 'RG_DIR_PROMPT')}</b>", reply_markup=rg_kb(lang))
+
+
+@router.callback_query(F.data == "rg:menu")
+async def cb_rg_menu(cb: CallbackQuery, storage: BotStorage) -> None:
+    lang = storage.get_lang(cb.message.chat.id, config.DEFAULT_LANG)
+    await _edit(cb, f"<b>{t(lang, 'RG_DIR_PROMPT')}</b>", rg_kb(lang))
+    await cb.answer()
+
+
+async def _rg_screen(cb: CallbackQuery, ratesguru: RatesGuruService,
+                     storage: BotStorage, key: str, force: bool = False) -> None:
+    if key not in RG_DIRECTIONS:
+        await cb.answer()
+        return
+    lang = storage.get_lang(cb.message.chat.id, config.DEFAULT_LANG)
+    result = await ratesguru.get(key, force=force)
+    await _edit(cb, render.rg_text(result, RG_DIRECTIONS[key], lang), rg_screen_kb(lang, key))
+    await cb.answer()
+
+
+@router.callback_query(F.data.startswith("rg:dir:"))
+async def cb_rg_dir(cb: CallbackQuery, ratesguru: RatesGuruService, storage: BotStorage) -> None:
+    await _rg_screen(cb, ratesguru, storage, cb.data.split(":", 2)[2])
+
+
+@router.callback_query(F.data.startswith("rg:rfsh:"))
+async def cb_rg_rfsh(cb: CallbackQuery, ratesguru: RatesGuruService, storage: BotStorage) -> None:
+    await _rg_screen(cb, ratesguru, storage, cb.data.split(":", 2)[2], force=True)
 
 
 # ---------- BestChange (обменники) ----------

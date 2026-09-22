@@ -19,6 +19,7 @@ from datetime import datetime, timezone
 from . import formatting as fmt
 from .i18n import t
 from .service import Snapshot, UsdtUsdView
+from .sources.ratesguru import direction_url as rg_direction_url
 from .venue_links import SOURCE_URLS, ext_link, venue_link
 
 STALE_AFTER_SECONDS = 180        # снапшот старше 3×TTL помечаем как устаревший
@@ -277,6 +278,49 @@ def usdtusd_text(view: UsdtUsdView, lang: str, now: datetime | None = None) -> s
     )
     lines.append(credit)
     lines += _tail(snap, lang, now)
+    return "\n".join(lines)
+
+
+# ---------- /ratesguru ----------
+
+_ZONE_EMOJI = {"green": "🟢", "yellow": "🟡", "red": "🔴"}
+
+
+def rg_text(result, direction, lang: str, now: datetime | None = None) -> str:
+    """Экран RatesGuru: топ-5 обменников (после медианного фильтра бэйт-строк)."""
+    now = _now(now)
+    if not result.ok:
+        return t(lang, "BC_UNAVAILABLE")
+    if not result.rows:
+        return t(lang, "BC_EMPTY")
+    name = direction.name_ru if lang == "ru" else direction.name_es
+    lines = [
+        f"<b>{t(lang, 'RG_TITLE', direction=name)}</b>",
+        "",
+        t(lang, "BC_BETTER_MIN" if direction.better == "min" else "BC_BETTER_MAX"),
+        "",
+    ]
+    for i, r in enumerate(result.rows, 1):
+        marker = "🥇 " if i == 1 else f"{i}. "
+        parts = [f"{marker}{fmt.money(r.rate, lang)} RUB / 1 USDT"]
+        if r.min_amount:
+            parts.append(f"{t(lang, 'BC_MIN')} {fmt.money(r.min_amount, lang, 0)}")
+        if r.reserve is not None and r.reserve_unit:
+            parts.append(f"{t(lang, 'BC_RESERVE')}: {fmt.money(r.reserve, lang, 0)} {r.reserve_unit}")
+        badge = _ZONE_EMOJI.get(r.zone or "", "")
+        rep = f"{r.reputation}%" if r.reputation is not None else ""
+        tail = " ".join(x for x in (badge, rep) if x)
+        if tail:
+            parts.append(tail)
+        lines.append(" · ".join(parts))
+    lines.append("")
+    if result.dropped:
+        lines.append(t(lang, "RG_DROPPED", n=str(result.dropped)))
+    lines.append(t(lang, "RG_FOOTER"))
+    lines.append("")
+    lines.append(ext_link(t(lang, "RG_CREDIT"), rg_direction_url(direction)))
+    if result.fetched_at:
+        lines.append(f"{t(lang, 'UPDATED')}: {fmt.ago(result.fetched_at, lang, now)}")
     return "\n".join(lines)
 
 

@@ -19,6 +19,7 @@ from aiogram.types import BotCommand
 from . import config
 from .alerts import AlertManager, alert_worker
 from .bestchange import BestChangeService
+from .ratesguru import RatesGuruService
 from .digest import DigestManager
 from .handlers import router
 from .http_client import AiohttpClient
@@ -41,6 +42,7 @@ async def set_bot_commands(bot: Bot) -> None:
             BotCommand(command="digest", description="Digesta diaria"),
             BotCommand(command="how", description="Cómo cambiar / как обменять"),
             BotCommand(command="bestchange", description="Intercambiadores BestChange"),
+            BotCommand(command="ratesguru", description="Intercambiadores RatesGuru (RUB/USDT)"),
             BotCommand(command="lang", description="Idioma / язык"),
             BotCommand(command="help", description="Ayuda"),
         ]
@@ -76,6 +78,7 @@ async def run() -> None:
     dp["storage"] = storage
     dp["p2p"] = p2p
     dp["bestchange"] = BestChangeService(client)
+    dp["ratesguru"] = RatesGuruService(client)
     dp.include_router(router)
 
     await set_bot_commands(bot)

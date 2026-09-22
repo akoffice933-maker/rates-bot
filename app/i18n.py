@@ -17,6 +17,7 @@ STRINGS: dict[str, dict[str, str]] = {
             "/usdt — mejores precios de USDT/ARS\n"
             "/usdtusd — USDT ⇄ USD: efectivo y sin efectivo\n"
             "/compare — USDT/ARS en todas las fuentes\n"
+            "/ratesguru — intercambiadores RUB/USDT (segundo monitor)\n"
             "/spread — brecha USDT vs Blue\n"
             "/alert — alertas de brecha y de cotización\n"
             "/p2p — anuncios en vivo de Binance P2P\n"
@@ -98,6 +99,11 @@ STRINGS: dict[str, dict[str, str]] = {
         "M_USDTUSD_CASH_BUY": "Compra USDT por USD (efectivo)",
         "ALERT_CUSTOM_PROMPT_USD": "Escribí el valor en USD por 1 USDT (por ejemplo 1,03):",
         "ALERT_CUSTOM_BAD_USD": "⛔️ No entendí el número. Ejemplo: 1,03 (entre 0,8 y 1,5).",
+        "RG_DIR_PROMPT": "Elegí la dirección (RatesGuru):",
+        "RG_TITLE": "📊 RatesGuru — {direction}",
+        "RG_DROPPED": "🧹 filas señuelo filtradas: {n} (desviación >10% de la mediana)",
+        "RG_FOOTER": "Cotización, límites y reputación según RatesGuru (kurs.expert)",
+        "RG_CREDIT": "Datos: RatesGuru (kurs.expert)",
         "BTN_COMPARE": "⚖️ Comparar",
         "COMPARE_TITLE": "⚖️ USDT/ARS — comparación de fuentes",
         "CMP_SELL_HDR": "📤 Vender USDT → recibir ARS (mejor primero):",
@@ -226,6 +232,7 @@ STRINGS: dict[str, dict[str, str]] = {
             "/usdt — лучшие цены USDT/ARS\n"
             "/usdtusd — USDT ⇄ USD: наличные и безнал\n"
             "/compare — USDT/ARS по всем источникам\n"
+            "/ratesguru — обменники RUB/USDT (второй монитор)\n"
             "/spread — спред USDT vs Blue\n"
             "/alert — алерты спреда и курсов\n"
             "/p2p — живые объявления Binance P2P\n"
@@ -307,6 +314,11 @@ STRINGS: dict[str, dict[str, str]] = {
         "M_USDTUSD_CASH_BUY": "Покупка USDT за USD (нал)",
         "ALERT_CUSTOM_PROMPT_USD": "Введи значение в USD за 1 USDT (например 1,03):",
         "ALERT_CUSTOM_BAD_USD": "⛔️ Не понял число. Пример: 1,03 (от 0,8 до 1,5).",
+        "RG_DIR_PROMPT": "Выберите направление (RatesGuru):",
+        "RG_TITLE": "📊 RatesGuru — {direction}",
+        "RG_DROPPED": "🧹 отфильтровано бэйт-строк: {n} (отклонение >10% от медианы)",
+        "RG_FOOTER": "Курс, лимиты и репутация — по данным RatesGuru (kurs.expert)",
+        "RG_CREDIT": "Данные: RatesGuru (kurs.expert)",
         "BTN_COMPARE": "⚖️ Сравнить",
         "COMPARE_TITLE": "⚖️ USDT/ARS — сравнение источников",
         "CMP_SELL_HDR": "📤 Продать USDT → получить ARS (лучше — сверху):",
