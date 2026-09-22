@@ -232,12 +232,18 @@ def _usdtusd_context(snap: Snapshot, lang: str) -> list[str]:
 
 
 async def alert_worker(
-    bot: Sender, service, manager: AlertManager, digest=None, interval_seconds: int = 60
+    bot: Sender, service, manager: AlertManager, digest=None, interval_seconds: int = 60,
+    history=None, history_interval_seconds: int = 900,
 ) -> None:
-    """Фоновый цикл: тёплый кэш + проверка алертов + отправка дайджестов."""
+    """Фоновый цикл: тёплый кэш + запись истории + алерты + дайджесты."""
     while True:
         try:
             snap = await service.get_snapshot_full()
+            if history is not None:
+                try:
+                    history.maybe_record(snap, history_interval_seconds)
+                except Exception:
+                    log.exception("не записана история курсов")
             await manager.check(snap, bot=bot)
             if digest is not None:
                 await digest.check(bot, snap)

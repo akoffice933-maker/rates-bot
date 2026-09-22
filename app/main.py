@@ -25,7 +25,7 @@ from .handlers import router
 from .http_client import AiohttpClient
 from .p2p import BinanceP2PService
 from .service import RatesService
-from .storage import BotStorage
+from .storage import BotStorage, RateHistoryStore
 
 
 async def set_bot_commands(bot: Bot) -> None:
@@ -65,6 +65,7 @@ async def run() -> None:
         pages=config.BINANCE_P2P_PAGES,
         rows=config.BINANCE_P2P_ROWS,
     )
+    history = RateHistoryStore(config.HISTORY_DB_PATH)
     alerts = AlertManager(
         storage,
         cooldown_minutes=config.ALERT_COOLDOWN_MINUTES,
@@ -83,7 +84,10 @@ async def run() -> None:
 
     await set_bot_commands(bot)
     worker = asyncio.create_task(
-        alert_worker(bot, service, alerts, digest, config.ALERT_POLL_SECONDS)
+        alert_worker(
+            bot, service, alerts, digest, config.ALERT_POLL_SECONDS,
+            history=history, history_interval_seconds=config.HISTORY_INTERVAL_SECONDS,
+        )
     )
     try:
         await bot.delete_webhook(drop_pending_updates=True)

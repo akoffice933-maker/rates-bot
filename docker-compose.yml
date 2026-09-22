@@ -6,6 +6,7 @@ services:
     env_file: .env
     environment:
       DB_PATH: /data/bot.db
+      HISTORY_DB_PATH: /data/history.db
     volumes:
       - ./data:/data
 
@@ -16,5 +17,8 @@ services:
     command: python -m app.web
     environment:
       WEB_PORT: "8000"
+      HISTORY_DB_PATH: /data/history.db
     ports:
       - "8000:8000"
+    volumes:
+      - ./data:/data

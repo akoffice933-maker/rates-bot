@@ -15,8 +15,13 @@ DOLARAPI = load("dolarapi.json")
 CRIPTOYA = load("criptoya_usdt_ars.json")
 
 
+CRIPTOYA_USD = load("criptoya_usdt_usd.json")
+
+
 class FakeClient:
     async def get_json(self, url: str):
+        if "USDT/USD" in url:
+            return CRIPTOYA_USD
         if "bluelytics" in url:
             return BLUELYTICS
         if "dolarapi" in url:

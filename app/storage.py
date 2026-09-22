@@ -117,6 +117,80 @@ def _migrate_alerts_v12_to_v13(conn: sqlite3.Connection) -> None:
     conn.execute("DROP TABLE alerts_old")
 
 
+RATE_HISTORY_SCHEMA = """
+CREATE TABLE IF NOT EXISTS rate_history (
+    ts            INTEGER PRIMARY KEY,        -- epoch seconds (UTC)
+    blue_buy      REAL, blue_sell      REAL,
+    oficial_sell  REAL,
+    mep_sell      REAL, ccl_sell        REAL,
+    usdt_ask      REAL, usdt_bid        REAL,   -- лучшие цены USDT/ARS
+    usdtusd_ask   REAL, usdtusd_bid     REAL    -- лучшие цены USDT/USD (может быть NULL)
+)
+"""
+
+
+class RateHistoryStore:
+    """История ключевых курсов (для графиков и анализа волатильности).
+
+    Пишут и бот (воркер алертов), и веб (на запросах) — не чаще чем
+    min_interval; WAL-режим делает параллельную запись безопасной.
+    """
+
+    _COLS = ("blue_buy", "blue_sell", "oficial_sell", "mep_sell", "ccl_sell",
+             "usdt_ask", "usdt_bid", "usdtusd_ask", "usdtusd_bid")
+
+    def __init__(self, path: str) -> None:
+        self._path = path
+        with closing(self._connect()) as conn, conn:
+            conn.execute(RATE_HISTORY_SCHEMA)
+
+    def _connect(self) -> sqlite3.Connection:
+        conn = sqlite3.connect(self._path, timeout=30)
+        conn.execute("PRAGMA journal_mode=WAL")
+        return conn
+
+    def maybe_record(self, snap, min_interval_seconds: int) -> bool:
+        """Записать снимок, если с последней записи прошло >= min_interval."""
+        ts = int(snap.fetched_at.timestamp())
+        with closing(self._connect()) as conn, conn:
+            row = conn.execute("SELECT MAX(ts) FROM rate_history").fetchone()
+            if row and row[0] is not None and ts - row[0] < min_interval_seconds:
+                return False
+            values = {
+                "blue_buy": snap.blue.buy if snap.blue else None,
+                "blue_sell": snap.blue.sell if snap.blue else None,
+                "oficial_sell": snap.oficial.sell if snap.oficial else None,
+                "mep_sell": snap.mep.sell if snap.mep else None,
+                "ccl_sell": snap.ccl.sell if snap.ccl else None,
+                "usdt_ask": snap.usdt.asks[0].ask if snap.usdt and snap.usdt.asks else None,
+                "usdt_bid": snap.usdt.bids[0].bid if snap.usdt and snap.usdt.bids else None,
+                "usdtusd_ask": (
+                    snap.usdt_usd.asks[0].ask
+                    if getattr(snap, "usdt_usd", None) and snap.usdt_usd.asks else None
+                ),
+                "usdtusd_bid": (
+                    snap.usdt_usd.bids[0].bid
+                    if getattr(snap, "usdt_usd", None) and snap.usdt_usd.bids else None
+                ),
+            }
+            cols = ", ".join(self._COLS)
+            marks = ", ".join("?" for _ in self._COLS)
+            conn.execute(
+                f"INSERT OR REPLACE INTO rate_history (ts, {cols}) VALUES (?, {marks})",
+                (ts, *(values[c] for c in self._COLS)),
+            )
+        return True
+
+    def get_history(self, since_ts: int) -> list[dict]:
+        """Точки истории начиная с since_ts (epoch), по возрастанию времени."""
+        with closing(self._connect()) as conn:
+            conn.row_factory = sqlite3.Row
+            rows = conn.execute(
+                "SELECT * FROM rate_history WHERE ts >= ? ORDER BY ts", (since_ts,)
+            ).fetchall()
+        return [dict(r) for r in rows]
+
+
 class BotStorage:
     def __init__(self, path: str = "bot.db") -> None:
         self._path = path
