@@ -18,6 +18,7 @@ LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
 # Алерты
 ALERT_POLL_SECONDS = int(os.getenv("ALERT_POLL_SECONDS", "60"))
+WEB_PORT = int(os.getenv("WEB_PORT", "8000"))
 ALERT_COOLDOWN_MINUTES = int(os.getenv("ALERT_COOLDOWN_MINUTES", "30"))
 ALERT_HYSTERESIS_PCT = float(os.getenv("ALERT_HYSTERESIS_PCT", "0.2"))
 

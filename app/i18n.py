@@ -99,6 +99,25 @@ STRINGS: dict[str, dict[str, str]] = {
         "M_USDTUSD_CASH_BUY": "Compra USDT por USD (efectivo)",
         "ALERT_CUSTOM_PROMPT_USD": "Escribí el valor en USD por 1 USDT (por ejemplo 1,03):",
         "ALERT_CUSTOM_BAD_USD": "⛔️ No entendí el número. Ejemplo: 1,03 (entre 0,8 y 1,5).",
+        "WEB_TITLE": "💵 Cotizaciones en Argentina",
+        "WEB_SUB": "Dólar (oficial, blue, MEP, CCL, tarjeta) y USDT/ARS — datos en tiempo real",
+        "WEB_USD_TABLE": "USD/ARS",
+        "WEB_BUY": "Compra",
+        "WEB_SELL": "Venta",
+        "WEB_BEST_BUY": "Comprar USDT (mejor)",
+        "WEB_BEST_SELL": "Vender USDT (mejor)",
+        "WEB_MEDIAN_ASK": "USDT — mediana de compra",
+        "WEB_MEDIAN_BID": "USDT — mediana de venta",
+        "WEB_SPREAD": "Brecha USDT vs Blue",
+        "WEB_PARTIAL": "Fuentes parcialmente no disponibles",
+        "WEB_VENUE": "Plataforma",
+        "WEB_PRICE": "Precio",
+        "WEB_API_NOTE": "API",
+        "WEB_CREDIT": (
+            "Datos: Bluelytics, DolarAPI y CriptoYa (agregador de decenas de plataformas). "
+            "Metodología: filtro de outliers ±10% de la mediana, spreads por medianas. "
+            "Solo informativo, no constituye asesoramiento financiero."
+        ),
         "RG_DIR_PROMPT": "Elegí la dirección (RatesGuru):",
         "RG_TITLE": "📊 RatesGuru — {direction}",
         "RG_DROPPED": "🧹 filas señuelo filtradas: {n} (desviación >10% de la mediana)",
@@ -314,6 +333,25 @@ STRINGS: dict[str, dict[str, str]] = {
         "M_USDTUSD_CASH_BUY": "Покупка USDT за USD (нал)",
         "ALERT_CUSTOM_PROMPT_USD": "Введи значение в USD за 1 USDT (например 1,03):",
         "ALERT_CUSTOM_BAD_USD": "⛔️ Не понял число. Пример: 1,03 (от 0,8 до 1,5).",
+        "WEB_TITLE": "💵 Котировки в Аргентине",
+        "WEB_SUB": "Доллар (oficial, blue, MEP, CCL, tarjeta) и USDT/ARS — данные в реальном времени",
+        "WEB_USD_TABLE": "USD/ARS",
+        "WEB_BUY": "Покупка",
+        "WEB_SELL": "Продажа",
+        "WEB_BEST_BUY": "Купить USDT (лучшая)",
+        "WEB_BEST_SELL": "Продать USDT (лучшая)",
+        "WEB_MEDIAN_ASK": "USDT — медиана покупки",
+        "WEB_MEDIAN_BID": "USDT — медиана продажи",
+        "WEB_SPREAD": "Спред USDT к Blue",
+        "WEB_PARTIAL": "Часть источников недоступна",
+        "WEB_VENUE": "Площадка",
+        "WEB_PRICE": "Курс",
+        "WEB_API_NOTE": "API",
+        "WEB_CREDIT": (
+            "Данные: Bluelytics, DolarAPI и CriptoYa (агрегатор десятков площадок). "
+            "Методология: фильтр выбросов ±10% от медианы, спреды по медианам. "
+            "Только информативно, не является финансовой рекомендацией."
+        ),
         "RG_DIR_PROMPT": "Выберите направление (RatesGuru):",
         "RG_TITLE": "📊 RatesGuru — {direction}",
         "RG_DROPPED": "🧹 отфильтровано бэйт-строк: {n} (отклонение >10% от медианы)",

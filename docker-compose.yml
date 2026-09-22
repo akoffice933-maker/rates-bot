@@ -8,3 +8,13 @@ services:
       DB_PATH: /data/bot.db
     volumes:
       - ./data:/data
+
+  web:
+    build: .
+    container_name: rates-web
+    restart: unless-stopped
+    command: python -m app.web
+    environment:
+      WEB_PORT: "8000"
+    ports:
+      - "8000:8000"
